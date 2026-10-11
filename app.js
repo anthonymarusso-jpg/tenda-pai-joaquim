@@ -173,14 +173,14 @@ function valid(o) { return o && Array.isArray(o.members) && Array.isArray(o.tx) 
 function normalize(o) {
   o.v = 2; o.pres = o.pres || {}; o.fila = o.fila || {}; o.pontos = o.pontos || []; o.casa = Object.assign(casaPadrao(), o.casa || {});
   o.pinHash = o.pinHash || ''; o.tema = o.tema || 'auto';
-  o.members.forEach(x => { if (x.entidade && !x.entidades) x.entidades = x.entidade; x.entidades = x.entidades || ''; x.nasc = x.nasc || ''; x.entrada = x.entrada || ''; x.obs = x.obs || ''; });
+  o.members.forEach(x => { if (x.entidade && !x.entidades) x.entidades = x.entidade; x.entidades = x.entidades || ''; if (!Array.isArray(x.orixas)) x.orixas = x.orixa ? [{ n: x.orixa, p: 'De cabeça (1º)' }] : []; if (!Array.isArray(x.guias)) x.guias = x.entidades.split(',').map(z => z.trim()).filter(Boolean).map(n => ({ l: guessLinha(n), n, el: [] })); x.nasc = x.nasc || ''; x.entrada = x.entrada || ''; x.obs = x.obs || ''; });
   o.events.forEach(e => { if (!e.linha) e.linha = guessLinha(e.tipo || e.titulo || ''); });
   o.stock.forEach(i => { i.cat = i.cat || 'Outros'; });
   return o;
 }
 function guessLinha(t) {
   t = t.toLowerCase();
-  if (t.includes('caboclo')) return 'caboclo'; if (t.includes('preto')) return 'pretovelho'; if (t.includes('boiadeiro')) return 'boiadeiro';
+  if (t.includes('cabocl')) return 'caboclo'; if (t.includes('preto') || t.includes('vov') || t.includes('vô ') || t.includes('tia ') || t.includes('pai ')) return 'pretovelho'; if (t.includes('boiadeiro')) return 'boiadeiro';
   if (t.includes('crian') || t.includes('erê')) return 'crianca'; if (t.includes('marinheiro')) return 'marinheiro'; if (t.includes('baian')) return 'baiano';
   if (t.includes('malandr')) return 'malandro'; if (t.includes('pomba')) return 'pombagira'; if (t.includes('exu')) return 'exu'; if (t.includes('cigan')) return 'cigano'; if (t.includes('desenv')) return 'desenv';
   if (t.includes('festa') || t.includes('obriga')) return 'festa'; return 'outros';
@@ -188,7 +188,7 @@ function guessLinha(t) {
 function load() {
   try { const r = localStorage.getItem(KEY); if (r) { const o = JSON.parse(r); if (valid(o)) return normalize(o); } } catch (e) {}
   try { const r = localStorage.getItem(OLD_KEY); if (r) { const o = JSON.parse(r); if (valid(o)) return normalize(o); } } catch (e) {}
-  return seed();
+  return normalize(seed());
 }
 let S = load();
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('Não consegui salvar. Libere espaço no celular.'); } }
@@ -381,7 +381,7 @@ ajustes() {
     `<div class="card stack"><h3 style="margin:0">Senha do app</h3><p style="margin:0" class="muted">${S.pinHash ? 'O app pede uma senha de 4 números ao abrir.' : 'Proteja o caixa e os dados dos filhos com uma senha de 4 números.'}</p>${S.pinHash ? '<div class="grid2"><button class="btn ghost" data-act="pin-set">Trocar senha</button><button class="btn danger" data-act="pin-off">Tirar senha</button></div>' : '<button class="btn" data-act="pin-set">Criar senha</button>'}</div>` +
     `<div class="card stack"><h3 style="margin:0">Cópia de segurança</h3><p style="margin:0" class="muted">Os dados ficam só neste celular. Salve uma cópia e guarde no Drive ou mande para você no WhatsApp. Use a mesma cópia para passar tudo para outro celular.</p><div class="grid2"><button class="btn" data-act="bk-export">Salvar cópia</button><label class="btn ghost" for="bkfile">Restaurar cópia</label></div><input id="bkfile" type="file" accept="application/json,.json" hidden></div>` +
     `<div class="card stack"><h3 style="margin:0">Recomeçar</h3>${S.demo ? '<button class="btn danger block" data-act="demo-ask">Apagar os dados de exemplo</button>' : '<button class="btn danger block" data-act="seed-ask">Apagar tudo e ver os exemplos</button>'}</div>` +
-    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.5</p>`;
+    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.7</p>`;
 }
 };
 const menuRow = (v, i, a, b) => `<button class="row" data-act="mais-go" data-v="${v}"><span class="av">${ic(i)}</span><span class="main"><strong>${a}</strong><small>${b}</small></span>${ic('right')}</button>`;
@@ -391,7 +391,7 @@ const backBtn = t => `<div class="vh"><h2>${t}</h2><button class="btn ghost sm" 
 function filhosList() {
   const q = UI.q.trim().toLowerCase(), m = ym(new Date());
   const l = S.members.filter(x => {
-    const hay = (x.nome + ' ' + x.entidades + ' ' + x.orixa + ' ' + x.cargo).toLowerCase();
+    const hay = (x.nome + ' ' + x.entidades + ' ' + (x.orixas || []).map(o => o.n).join(' ') + ' ' + x.orixa + ' ' + x.cargo).toLowerCase();
     if (q && !hay.includes(q)) return false;
     if (UI.filter === 'pend') return x.ativo && x.mensal > 0 && !paid(x.id, m);
     if (UI.filter === 'dia') return x.ativo && (x.mensal <= 0 || paid(x.id, m));
@@ -400,8 +400,8 @@ function filhosList() {
   if (!l.length) return empty('Ninguém por aqui', 'Ajuste a busca ou cadastre um filho da casa.');
   return l.map(x => {
     const chip = !x.ativo ? '<em class="chip mute">Afastado</em>' : (x.mensal <= 0 ? '' : (paid(x.id, m) ? '<em class="chip ok">Em dia</em>' : '<em class="chip warn">Pendente</em>'));
-    const sub = [x.cargo, x.entidades, x.orixa ? 'Orixá ' + x.orixa : ''].filter(Boolean).join(' · ');
-    return `<button class="row" data-act="member-open" data-id="${x.id}"><span class="av">${esc(initials(x.nome))}</span><span class="main"><strong>${esc(x.nome)}</strong><small>${esc(sub)}</small></span>${chip}</button>`;
+    const sub = [x.cargo, x.entidades, cabeca(x) ? 'Orixá ' + cabeca(x) : ''].filter(Boolean).join(' · ');
+    return `<button class="row" data-act="member-open" data-id="${x.id}">${avatar(x, 58)}<span class="main"><strong>${esc(x.nome)}</strong><small>${esc(sub)}</small></span>${chip}</button>`;
   }).join('');
 }
 function evRow(e) {
@@ -441,13 +441,113 @@ function giraTexto(e) {
 }
 
 /* ---------- formulários ---------- */
+
+/* Vários orixás e guias por médium: papéis e elementos de trabalho de cada linha */
+const PAPEIS = ['De cabeça (1º)', 'Juntó (2º)', 'Adjuntó (3º)', 'Outro'];
+const GLINHAS = ['caboclo', 'pretovelho', 'boiadeiro', 'crianca', 'marinheiro', 'baiano', 'cigano', 'exu', 'pombagira', 'malandro', 'outros'];
+const gNome = k => k === 'outros' ? 'Outra linha' : (LINHAS[k] || {}).nome || 'Outra linha';
+const ELEMENTOS = {
+  caboclo: ['Charuto', 'Pemba verde', 'Vela verde', 'Cocar', 'Arco e flecha', 'Ervas da mata', 'Frutas', 'Mel', 'Vinho', 'Água de coco'],
+  pretovelho: ['Cachimbo', 'Fumo de rolo', 'Café', 'Terço / rosário', 'Pemba branca', 'Vela branca', 'Arruda', 'Guiné', 'Banquinho', 'Bengala'],
+  boiadeiro: ['Laço', 'Chapéu de couro', 'Berrante', 'Chicote', 'Cigarro de palha', 'Cachaça', 'Carne-seca', 'Pemba amarela', 'Vela marrom'],
+  crianca: ['Doces', 'Balas', 'Guaraná', 'Bolo', 'Brinquedos', 'Frutas doces', 'Pemba rosa', 'Pemba azul', 'Vela rosa e azul'],
+  marinheiro: ['Rum', 'Cachaça', 'Cigarro', 'Quepe', 'Água do mar', 'Peixe', 'Pemba azul', 'Vela azul', 'Âncora'],
+  baiano: ['Coco', 'Batida de coco', 'Cigarro de palha', 'Chapéu de palha', 'Farofa', 'Dendê', 'Pemba amarela', 'Vela amarela'],
+  cigano: ['Baralho', 'Moedas', 'Lenço', 'Pandeiro', 'Punhal', 'Cristais', 'Incenso', 'Vinho', 'Frutas', 'Vela colorida'],
+  exu: ['Marafo (cachaça)', 'Charuto', 'Capa', 'Tridente', 'Farofa de dendê', 'Pimenta', 'Pemba preta', 'Pemba vermelha', 'Vela preta e vermelha'],
+  pombagira: ['Champanhe', 'Cigarrilha', 'Rosa vermelha', 'Perfume', 'Leque', 'Batom', 'Licor de anis', 'Taça', 'Vela vermelha'],
+  malandro: ['Chapéu panamá', 'Terno branco', 'Cigarro', 'Cerveja', 'Batida', 'Bengala', 'Lenço vermelho', 'Baralho', 'Vela branca e vermelha'],
+  outros: ['Vela', 'Pemba', 'Ervas', 'Fumo', 'Bebida']
+};
+const NOME_EX = { caboclo: 'Caboclo Pena Branca', pretovelho: 'Pai Joaquim de Angola', boiadeiro: 'Manezinho Boiadeiro', crianca: 'Mariazinha', marinheiro: 'Martim Pescador', baiano: 'Zé do Coco', cigano: 'Cigana Esmeralda', exu: 'Exu Tranca-Rua', pombagira: 'Maria Padilha', malandro: 'Zé Pelintra', outros: 'Nome do guia' };
+const cabeca = x => { const l = x.orixas || []; return (l.find(o => o.p === PAPEIS[0]) || l[0] || {}).n || x.orixa || ''; };
+const oriRow = (o = { n: '', p: PAPEIS[0] }) => `<div class="orow"><select class="inp o-n" aria-label="Orixá"><option value="">Escolha o orixá</option>${opts(ORIXAS.map(z => z.n), o.n)}</select><select class="inp o-p" aria-label="Papel do orixá">${opts(PAPEIS, o.p)}</select><button type="button" class="iconbtn" data-act="multi-del" aria-label="Tirar este orixá">${ic('x')}</button></div>`;
+const elChips = (l, sel) => (ELEMENTOS[l] || ELEMENTOS.outros).map(e => `<button type="button" class="elc" data-act="el-tog" aria-pressed="${sel.includes(e)}">${esc(e)}</button>`).join('');
+const guiaCard = (g = { l: 'caboclo', n: '', el: [] }) => {
+  const extra = (g.el || []).filter(e => !(ELEMENTOS[g.l] || ELEMENTOS.outros).includes(e));
+  return `<div class="gcard"><div class="ghead"><select class="inp g-l" aria-label="Linha do guia">${GLINHAS.map(k => `<option value="${k}"${k === g.l ? ' selected' : ''}>${esc(gNome(k))}</option>`).join('')}</select><button type="button" class="iconbtn" data-act="multi-del" aria-label="Tirar este guia">${ic('x')}</button></div>
+    <input class="inp g-n" value="${esc(g.n)}" placeholder="Nome do guia (ex.: ${esc(NOME_EX[g.l] || 'Nome do guia')})" autocomplete="off" aria-label="Nome do guia">
+    <span class="glbl">Elementos que trabalha</span><div class="els">${elChips(g.l, g.el || [])}</div>
+    <input class="inp g-x" value="${esc(extra.join(', '))}" placeholder="Outros elementos (separe por vírgula)" autocomplete="off" aria-label="Outros elementos"></div>`;
+};
+function lerMultis() {
+  const orixas = [...document.querySelectorAll('#oriList .orow')].map(r => ({ n: r.querySelector('.o-n').value, p: r.querySelector('.o-p').value })).filter(o => o.n);
+  const guias = [...document.querySelectorAll('#guiaList .gcard')].map(c => ({
+    l: c.querySelector('.g-l').value, n: c.querySelector('.g-n').value.trim(),
+    el: [...c.querySelectorAll('.elc[aria-pressed="true"]')].map(b => b.textContent).concat(c.querySelector('.g-x').value.split(',').map(z => z.trim()).filter(Boolean))
+  })).filter(g => g.n || g.el.length);
+  return { orixas, guias };
+}
+
+/* ---------- foto do médium com moldura do orixá ---------- */
+const ORI_KEY = n => { const o = (window.AXE ? AXE.ORIXAS : []).find(o => o.n === n); return o ? o.k : ''; };
+const LIDER = c => /^(Pai|Mãe) de santo$/.test(c || '');
+const MOTIVO = {
+  oxala: ['M0-9 2.6-2.6 9-2.6 3.9 1.6 5.4 8.4 0 4.3-5.4 8.4-3.9 1.6-9-2.6-2.6-2.6Z', '#ffffff', '#c9a24a'],
+  iemanja: ['M0-9 2.6-2.6 9-2.6 3.9 1.6 5.4 8.4 0 4.3-5.4 8.4-3.9 1.6-9-2.6-2.6-2.6Z', '#dff2ff', '#6fb6ea'],
+  oxum: ['M0-10 2-4 7-7 4-2 10 0 4 2 7 7 2 4 0 10-2 4-7 7-4 2-10 0-4-2-7-7-2-4Z', '#ffd75e', '#b8860b'],
+  ogum: ['M0-11 2.4 3H5.5v2.4H2.2L1.2 10h-2.4l-1-4.6h-3.3V3h3.1Z', '#e8edf5', '#c8302a'],
+  oxossi: ['M0-10C7-4 7 4 0 10-7 4-7-4 0-10Z', '#3fae5a', '#1d5e2f'],
+  xango: ['M-1-10h2v20h-2ZM1-7C9-10 10 1 1-1ZM-1-7C-9-10-10 1-1-1Z', '#c98b4b', '#5a3714'],
+  iansa: ['M3-11-6 1h5l-3 10L8-3H3Z', '#ffd23f', '#e0603a'],
+  nana: ['M0-10C7 0 7 8 0 8S-7 0 0-10Z', '#b79be0', '#5d3f8f'],
+  omulu: ['M-5-10h2l1 20h-2ZM-1-10h2v20h-2ZM3-10h2l-1 20h-2Z', '#e8d18c', '#8a6b2a'],
+  ibeji: ['M0-8a8 8 0 1 1 0 16 8 8 0 1 1 0-16Zm0 4a4 4 0 1 0 0 8', '#ff9cc8', '#6fb6ea'],
+  '': ['M0-9 2.6-2.6 9-2.6 3.9 1.6 5.4 8.4 0 4.3-5.4 8.4-3.9 1.6-9-2.6-2.6-2.6Z', '#c9d2f5', '#1a3a9c']
+};
+let molSeq = 0;
+function moldura(k, lider) {
+  const id = 'm' + (++molSeq), o = (window.AXE ? AXE.ORIXAS : []).find(x => x.k === k);
+  const cores = lider ? ['#f7d77e', '#c8302a', '#f7d77e', '#e0603a'] : (o ? o.cores : ['#ffffff', '#1a3a9c']);
+  const n = 30, mot = [], beads = [];
+  const motK = i => lider ? (i % 2 ? 'iansa' : 'ogum') : k;
+  const nm = lider ? 8 : 6;
+  for (let i = 0; i < n; i++) {
+    const t = i / n * Math.PI * 2 - Math.PI / 2, x = (100 + Math.cos(t) * 84).toFixed(1), y = (100 + Math.sin(t) * 84).toFixed(1);
+    if (i % (n / (lider ? 10 : 6)) === 0) continue;
+    const c = cores[i % cores.length];
+    beads.push(`<circle cx="${x}" cy="${y}" r="5.6" fill="${c}" stroke="rgba(0,0,0,.35)" stroke-width="1"/><circle cx="${(+x - 1.8).toFixed(1)}" cy="${(+y - 1.8).toFixed(1)}" r="1.7" fill="#fff" opacity=".55"/>`);
+  }
+  const step = lider ? 10 : 6;
+  for (let j = 0; j < step; j++) {
+    const t = j / step * Math.PI * 2 - Math.PI / 2, x = 100 + Math.cos(t) * 84, y = 100 + Math.sin(t) * 84, mk = MOTIVO[motK(j)] || MOTIVO[''];
+    const fill = lider ? `url(#g${id})` : mk[1];
+    mot.push(`<g transform="translate(${x.toFixed(1)} ${y.toFixed(1)}) rotate(${(t * 180 / Math.PI + 90).toFixed(1)}) scale(1.05)"><path d="${mk[0]}" fill="${fill}" stroke="${lider ? '#6b4a0c' : mk[2]}" stroke-width="1.4" stroke-linejoin="round"/></g>`);
+  }
+  const ring = lider ? `url(#g${id})` : (o ? o.cores[0] === '#ffffff' && o.cores[1] ? o.cores[1] : o.cores[0] : '#1a3a9c');
+  const coroa = lider ? `<g transform="translate(100 13)"><path d="M-17 6-21-9-9-1 0-14 9-1 21-9 17 6Z" fill="url(#g${id})" stroke="#6b4a0c" stroke-width="1.6" stroke-linejoin="round"/><circle cx="0" cy="-14" r="3" fill="#c8302a"/><circle cx="-21" cy="-9" r="2.4" fill="#e0603a"/><circle cx="21" cy="-9" r="2.4" fill="#e0603a"/></g>` : '';
+  return `<svg class="mold" viewBox="0 0 200 200" aria-hidden="true"><defs><linearGradient id="g${id}" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff3c4"/><stop offset=".35" stop-color="#e2b84f"/><stop offset=".6" stop-color="#a8740a"/><stop offset="1" stop-color="#f7d77e"/></linearGradient></defs>
+<circle cx="100" cy="100" r="84" fill="none" stroke="${ring}" stroke-width="${lider ? 26 : 22}" opacity="${lider ? 1 : .9}"/>
+<circle cx="100" cy="100" r="${lider ? 97 : 95.5}" fill="none" stroke="${lider ? `url(#g${id})` : '#c9a24a'}" stroke-width="${lider ? 4 : 2}"/>
+<circle cx="100" cy="100" r="71" fill="none" stroke="${lider ? `url(#g${id})` : '#c9a24a'}" stroke-width="${lider ? 4 : 2.5}"/>
+${beads.join('')}${mot.join('')}${coroa}</svg>`;
+}
+function avatar(x, size) {
+  const k = ORI_KEY(cabeca(x)), lider = LIDER(x.cargo), sz = size || 56;
+  const foto = x.foto ? `<img class="ft" src="${x.foto}" alt="">` : `<span class="ft ini">${esc(initials(x.nome))}</span>`;
+  const badgeK = k || (lider ? 'ogum' : '');
+  const badge = badgeK && window.AXE ? `<span class="bdg" title="${esc(cabeca(x) || 'Ogum')}">${AXE.medalhao(badgeK, 64)}</span>` : '';
+  return `<span class="ava${lider ? ' lider' : ''}" style="--s:${sz}px">${foto}${moldura(k, lider)}${badge}</span>`;
+}
+async function fotoParaDataURL(file) {
+  const url = URL.createObjectURL(file);
+  try {
+    const img = await new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = url; });
+    const S2 = 360, c = document.createElement('canvas'); c.width = c.height = S2;
+    const m = Math.min(img.naturalWidth, img.naturalHeight), sx = (img.naturalWidth - m) / 2, sy = Math.max(0, (img.naturalHeight - m) / 2 - (img.naturalHeight > img.naturalWidth ? m * .12 : 0));
+    c.getContext('2d').drawImage(img, sx, sy, m, m, 0, 0, S2, S2);
+    return c.toDataURL('image/jpeg', .8);
+  } finally { URL.revokeObjectURL(url); }
+}
+
 function memberForm(m) {
-  m = m || { id: '', nome: '', cargo: 'Médium', entidades: '', orixa: '', tel: '', nasc: '', entrada: today(), mensal: S.casa.mensal, ativo: true, obs: '' };
+  m = m || { id: '', nome: '', cargo: 'Médium', entidades: '', orixa: '', orixas: [], guias: [], tel: '', nasc: '', entrada: today(), mensal: S.casa.mensal, ativo: true, obs: '', foto: '' };
   return `<form class="form" data-form="member" data-id="${m.id}">
+    <div class="fotoed"><span id="fotoPrev">${avatar(m, 132)}</span><div class="stack"><label class="btn sm" for="f-foto">${m.foto ? 'Trocar foto' : 'Colocar foto'}</label><input type="file" id="f-foto" accept="image/*" hidden><button type="button" class="btn sm ghost" data-act="foto-del"${m.foto ? '' : ' hidden'}>Remover foto</button><small class="muted">A moldura muda conforme o orixá de cabeça.</small></div><input type="hidden" name="foto" id="f-fotodata" value="${esc(m.foto || '')}"></div>
     <label>Nome<input class="inp" id="f-nome" name="nome" required value="${esc(m.nome)}" autocomplete="off"></label>
     <label>Cargo na casa<select class="inp" id="f-cargo" name="cargo">${opts(CARGOS, m.cargo)}</select></label>
-    <label>Entidades que trabalha<input class="inp" id="f-ent" name="entidades" value="${esc(m.entidades)}" placeholder="Ex.: Caboclo Pena Branca, Vovó Cambinda" autocomplete="off"></label>
-    <label>Orixá de cabeça<select class="inp" id="f-ori" name="orixa"><option value="">Ainda não sabe</option>${opts(ORIXAS.map(o => o.n), m.orixa)}</select></label>
+    <div class="multi"><span class="mlbl">Orixás</span><div id="oriList" class="stack">${(m.orixas && m.orixas.length ? m.orixas : [{ n: '', p: PAPEIS[0] }]).map(oriRow).join('')}</div><button type="button" class="btn sm ghost" data-act="ori-add">${ic('plus')}Mais um orixá</button></div>
+    <div class="multi"><span class="mlbl">Guias que trabalha</span><div id="guiaList" class="stack">${(m.guias || []).map(guiaCard).join('')}</div><button type="button" class="btn sm ghost" data-act="guia-add">${ic('plus')}Acrescentar guia</button></div>
     <div class="row2"><label>Nascimento<input class="inp" id="f-nasc" name="nasc" type="date" value="${esc(m.nasc)}"></label><label>Entrou na casa<input class="inp" id="f-entr" name="entrada" type="date" value="${esc(m.entrada)}"></label></div>
     <div class="row2"><label>WhatsApp com DDD<input class="inp" id="f-tel" name="tel" inputmode="tel" value="${esc(m.tel)}" placeholder="11 98888-7777"></label><label>Mensalidade (R$)<input class="inp" id="f-men" name="mensal" type="number" min="0" step="1" inputmode="decimal" value="${esc(m.mensal)}"></label></div>
     <label>Observações<textarea class="inp" id="f-obs" name="obs" rows="3">${esc(m.obs)}</textarea></label>
@@ -516,10 +616,15 @@ function openMember(id) {
   const tel = telDigits(x.tel), pres = Object.keys(S.pres).filter(k => (S.pres[k] || []).includes(id)).length;
   const anos = x.entrada ? Math.max(0, Math.floor((parse(today()) - parse(x.entrada)) / (365.25 * 864e5))) : null;
   const pagoAgora = paid(id, m);
+  const ok = ORI_KEY(cabeca(x)), oo = ok && AXE.ORIXAS.find(o => o.k === ok);
+  const oriHtml = (x.orixas || []).length ? `<h3>Orixás</h3><div class="list">${x.orixas.map(o => { const k = ORI_KEY(o.n), a = k && AXE.ORIXAS.find(z => z.k === k); return `<div class="row">${k ? `<span class="medm">${AXE.medalhao(k, 48)}</span>` : ''}<span class="main"><strong>${esc(o.n)}</strong><small>${esc(o.p)}${a ? ' · ' + esc(a.s) : ''}</small></span></div>`; }).join('')}</div>` : '';
+  const guiaHtml = (x.guias || []).length ? `<h3>Guias que trabalha</h3><div class="stack">${x.guias.map(g => `<div class="card gview"><div class="gtop">${g.l !== 'outros' ? `<span class="medm">${AXE.medalhao(g.l, 52)}</span>` : ''}<span class="main"><strong>${esc(g.n || gNome(g.l))}</strong><small>${esc(gNome(g.l))}</small></span></div>${(g.el || []).length ? `<div class="els ro">${g.el.map(e => `<span class="elc">${esc(e)}</span>`).join('')}</div>` : ''}</div>`).join('')}</div>` : '';
   sheet(x.nome, `<div class="stack">
-    <dl class="kv card"><dt>Cargo</dt><dd>${esc(x.cargo)}</dd><dt>Entidades</dt><dd>${esc(x.entidades || '—')}</dd><dt>Orixá</dt><dd>${esc(x.orixa || '—')}</dd>
+    <div class="perfil">${avatar(x, 168)}<div class="pinfo"><strong>${esc(x.nome)}</strong><span>${esc(x.cargo)}</span>${oo ? `<span class="psaud">Filho de ${esc(oo.n)} · ${esc(oo.s)}</span>` : ''}</div></div>
+    <dl class="kv card"><dt>Cargo</dt><dd>${esc(x.cargo)}</dd>
     <dt>Nascimento</dt><dd>${esc(fmtBR(x.nasc))}</dd><dt>Na casa</dt><dd>${x.entrada ? esc(fmtBR(x.entrada)) + (anos !== null ? ' · ' + anos + (anos === 1 ? ' ano' : ' anos') : '') : '—'}</dd>
     <dt>Presenças</dt><dd class="num">${pres} ${pres === 1 ? 'gira' : 'giras'}</dd><dt>Mensalidade</dt><dd class="num">${brl(x.mensal)}</dd><dt>WhatsApp</dt><dd>${esc(x.tel || '—')}</dd>${x.obs ? `<dt>Obs.</dt><dd>${esc(x.obs)}</dd>` : ''}</dl>
+    ${oriHtml}${guiaHtml}
     ${x.ativo && x.mensal > 0 ? (pagoAgora ? `<span class="chip ok" style="align-self:flex-start">Mensalidade de ${mes} paga</span>` : `<button class="btn block" data-act="receber" data-mid="${id}" data-m="${m}" data-reopen="1">Registrar mensalidade de ${mes}</button>`) : ''}
     ${tel.length >= 10 ? `<div class="grid2">${x.ativo && x.mensal > 0 && !pagoAgora ? `<a class="btn wa" href="${esc(waLink(x.tel, cobrancaTexto(x, m)))}" target="_blank" rel="noopener">Lembrar mensalidade</a>` : ''}<a class="btn ghost" href="${esc(waLink(x.tel, 'Saravá, ' + x.nome.split(' ')[0] + '!'))}" target="_blank" rel="noopener">Abrir WhatsApp</a></div>` : '<p class="muted" style="margin:0">Cadastre o WhatsApp para mandar lembretes e recibos.</p>'}
     <h3>Últimos pagamentos</h3>${hist.length ? `<div class="list">${hist.map(t => `<div class="row"><span class="main"><strong>${esc(mesLabel(t.mes || t.data.slice(0, 7)))}</strong><small>pago em ${shortDate(t.data)}</small></span><span class="val pos num">${brl(t.valor)}</span>${tel.length >= 10 ? `<a class="iconbtn" href="${esc(waLink(x.tel, reciboTexto(x, t)))}" target="_blank" rel="noopener" aria-label="Enviar recibo">${ic('share')}</a>` : ''}</div>`).join('')}</div>` : '<p class="muted" style="margin:0">Nenhum pagamento registrado.</p>'}
@@ -628,6 +733,11 @@ async function shareVid() {
   window.open('https://wa.me/?text=' + encodeURIComponent(text + '\n' + link), '_blank', 'noopener');
 }
 
+function fotoPreview() {
+  const pv = $('#fotoPrev'); if (!pv) return;
+  pv.innerHTML = avatar({ nome: ($('#f-nome') || {}).value || '', foto: $('#f-fotodata').value, orixas: lerMultis().orixas, cargo: $('#f-cargo').value }, 132);
+}
+
 /* ---------- ações ---------- */
 const ACT = {
   close: () => closeSheet(),
@@ -676,6 +786,11 @@ const ACT = {
   'ponto-del': d => { S.pontos = S.pontos.filter(x => x.id !== d.id); save(); closeSheet(); render(true); toast('Ponto excluído'); },
   oxtab: d => { UI.oxTab = d.v; render(); },
   ficha: d => openFicha(d.tipo, d.k),
+  'ori-add': () => { $('#oriList').insertAdjacentHTML('beforeend', oriRow({ n: '', p: PAPEIS[Math.min(3, $('#oriList').children.length)] })); },
+  'guia-add': () => { $('#guiaList').insertAdjacentHTML('beforeend', guiaCard()); const c = $('#guiaList').lastElementChild; c.querySelector('.g-n').focus(); },
+  'multi-del': (d, b) => { const r = b.closest('.orow, .gcard'); if (r) r.remove(); fotoPreview(); },
+  'el-tog': (d, b) => { b.setAttribute('aria-pressed', b.getAttribute('aria-pressed') === 'true' ? 'false' : 'true'); },
+  'foto-del': () => { $('#f-fotodata').value = ''; const b = $('[data-act="foto-del"]'); if (b) b.hidden = true; fotoPreview(); },
   'vid-open': () => { const v = $('#vidEl'); if (!v.src) v.src = VIDEO; $('#vid').hidden = false; v.play().catch(() => {}); },
   'vid-close': () => closeVid(),
   'vid-share': () => shareVid(),
@@ -700,8 +815,10 @@ function showTelao(eid) {
 
 const FORMS = {
   member(fd, ds) {
-    const o = { nome: String(fd.get('nome') || '').trim(), cargo: fd.get('cargo'), entidades: String(fd.get('entidades') || '').trim(), orixa: fd.get('orixa') || '', tel: String(fd.get('tel') || '').trim(), nasc: fd.get('nasc') || '', entrada: fd.get('entrada') || '', mensal: Math.max(0, Number(fd.get('mensal') || 0)), ativo: fd.get('ativo') === 'on', obs: String(fd.get('obs') || '').trim() };
+    const mu = lerMultis();
+    const o = { nome: String(fd.get('nome') || '').trim(), cargo: fd.get('cargo'), orixas: mu.orixas, guias: mu.guias, entidades: mu.guias.map(g => g.n || gNome(g.l)).join(', '), orixa: '', tel: String(fd.get('tel') || '').trim(), nasc: fd.get('nasc') || '', entrada: fd.get('entrada') || '', mensal: Math.max(0, Number(fd.get('mensal') || 0)), ativo: fd.get('ativo') === 'on', obs: String(fd.get('obs') || '').trim(), foto: String(fd.get('foto') || '') };
     if (!o.nome) return;
+    o.orixa = cabeca(o);
     if (ds.id) Object.assign(byId(S.members, ds.id), o); else { o.id = uid(); S.members.push(o); }
     save(); closeSheet(); render(true); toast('Cadastro salvo');
   },
@@ -767,7 +884,14 @@ document.addEventListener('input', e => {
   if (e.target.id === 'pq') { UI.pq = e.target.value; const pos = e.target.selectionStart; render(true); const n = $('#pq'); if (n) { n.focus(); try { n.setSelectionRange(pos, pos); } catch (x) {} } }
 });
 document.addEventListener('change', async e => {
-  if (e.target.id !== 'bkfile' || !e.target.files[0]) return;
+  const t = e.target;
+  if (t.id === 'f-foto' && t.files[0]) {
+    try { $('#f-fotodata').value = await fotoParaDataURL(t.files[0]); const b = $('[data-act="foto-del"]'); if (b) b.hidden = false; } catch (x) { toast('Não consegui abrir essa foto.'); }
+    t.value = ''; fotoPreview(); return;
+  }
+  if (t.id === 'f-cargo' || t.classList.contains('o-n') || t.classList.contains('o-p')) { fotoPreview(); return; }
+  if (t.classList.contains('g-l')) { const c = t.closest('.gcard'), sel = [...c.querySelectorAll('.elc[aria-pressed="true"]')].map(b => b.textContent); c.querySelector('.els').innerHTML = elChips(t.value, sel); c.querySelector('.g-n').placeholder = 'Nome do guia (ex.: ' + (NOME_EX[t.value] || 'Nome do guia') + ')'; return; }
+  if (t.id !== 'bkfile' || !t.files[0]) return;
   try {
     const o = JSON.parse(await e.target.files[0].text());
     if (!valid(o)) throw new Error('inválido');
