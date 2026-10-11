@@ -244,3 +244,24 @@ nav{flex:none;display:grid;grid-template-columns:repeat(5,1fr);background:var(--
   @keyframes gira{from{transform:rotate(-90deg) scale(.7);opacity:0}to{transform:none;opacity:1}}
 }
 @media (min-width:520px){.sum .stat b{font-size:21px}}
+
+/* Orixás e linhas */
+.galeria{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+@media (min-width:560px){.galeria{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.oxcard{display:flex;flex-direction:column;align-items:center;gap:2px;text-align:center;background:var(--surface);border:1px solid var(--line);border-radius:18px;padding:12px 8px 12px;min-width:0}
+.oxcard .med{width:100%;max-width:150px;height:auto;margin-bottom:6px}
+.oxcard strong{font-family:var(--f-display);font-weight:800;font-size:18px;line-height:1.1}
+.oxcard .s{font-family:var(--f-hand);font-weight:700;font-size:22px;color:var(--brand);line-height:1.05}
+.oxcard small{color:var(--muted);font-size:13px}
+.ficha{display:flex;flex-direction:column;gap:14px}
+.ficha-top{display:flex;flex-direction:column;align-items:center;text-align:center;gap:2px;padding:4px 0 2px}
+.ficha-top .med{width:min(220px,62vw);height:auto;filter:drop-shadow(0 8px 18px rgba(8,18,70,.3))}
+.ficha-top .saud{font-family:var(--f-hand);font-weight:700;font-size:40px;line-height:1.05;color:var(--brand);margin-top:8px}
+.ficha-top .s2{font-family:var(--f-hand);font-weight:600;font-size:26px;color:var(--muted)}
+.ficha section{display:flex;flex-direction:column;gap:6px}
+.ficha section p{margin:0;line-height:1.5}
+.ficha .cores{display:inline-flex;gap:4px;margin-right:8px;vertical-align:-1px}
+.tags{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.tags li{padding:6px 12px;border-radius:99px;font-size:15px;font-weight:500;background:var(--gold-soft);color:var(--fg);border:1px solid color-mix(in srgb,var(--gold) 30%,transparent)}
+.tags.erva li{background:var(--ok-bg);border-color:color-mix(in srgb,var(--ok) 30%,transparent)}
+.nota{margin:2px 2px 0;font-size:14.5px}

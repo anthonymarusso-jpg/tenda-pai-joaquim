@@ -185,7 +185,7 @@ function load() {
 }
 let S = load();
 function save() { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { toast('Não consegui salvar. Libere espaço no celular.'); } }
-const UI = { tab: 'home', sub: 'menu', filter: 'todos', q: '', gv: 'prox', cm: ym(new Date()), pq: '', evTab: 'fila', unlocked: false };
+const UI = { tab: 'home', sub: 'menu', filter: 'todos', q: '', gv: 'prox', cm: ym(new Date()), pq: '', evTab: 'fila', unlocked: false, oxTab: 'orixas' };
 
 /* ---------- helpers ---------- */
 const byId = (list, id) => list.find(x => x.id === id) || null;
@@ -321,7 +321,7 @@ mais() {
     menuRow('estoque', 'box', 'Estoque', 'Velas, ervas, defumação e lista de compras') +
     menuRow('mural', 'mega', 'Mural de avisos', 'Recados da casa para mandar no WhatsApp') +
     menuRow('pontos', 'nota', 'Pontos cantados', 'O caderno de pontos da casa, por linha') +
-    menuRow('orixas', 'estrela', 'Orixás e linhas', 'Saudações, cores, dias e datas festivas') +
+    menuRow('orixas', 'estrela', 'Orixás e linhas', 'Saudações, cores, comidas, ervas e datas festivas') +
     menuRow('ajustes', 'gear', 'Ajustes da casa', 'Nome, PIX, senha do app, tema e cópia de segurança') +
     `</div><p class="muted" style="margin:4px 2px">Tudo fica guardado neste celular. Faça a cópia de segurança de vez em quando, em Ajustes.</p>`;
 }
@@ -350,11 +350,14 @@ pontos() {
       : empty(S.pontos.length ? 'Nenhum ponto encontrado' : 'Caderno vazio', S.pontos.length ? 'Tente outra palavra.' : 'Toque em Novo ponto e escreva a letra como a casa canta.'));
 },
 orixas() {
-  const fest = proximasFestas(FESTAS.length);
-  return backBtn('Orixás e linhas') + `<p class="sub">Referência rápida para a corrente. Segue a tradição mais comum; os fundamentos da sua casa vêm primeiro.</p>` +
-    `<h3>Orixás</h3><div class="list">${ORIXAS.map(o => `<div class="card orixa"><span class="contas">${contas(o.cores)}</span><div><h4>${esc(o.n)}</h4><span class="s">${esc(o.s)}</span><dl><dt>Cor</dt><dd>${esc(o.cor)}</dd><dt>Dia</dt><dd>${esc(o.dia)}</dd><dt>Regência</dt><dd>${esc(o.dom)}</dd><dt>Sincretismo</dt><dd>${esc(o.sinc)}</dd></dl></div></div>`).join('')}</div>` +
-    `<h3>Linhas de trabalho</h3><div class="card" style="display:flex;flex-wrap:wrap;gap:8px">${Object.keys(LINHAS).filter(k => !['desenv', 'festa', 'outros', 'orixas'].includes(k)).map(linhaChip).join('')}</div>` +
-    `<h3>Calendário de festas</h3><div class="list">${fest.map(f => { const d = parse(f.d); return `<div class="row festa"><span class="dt"><b>${d.getDate()}</b><i>${MES_S[d.getMonth()]}</i></span><span class="main"><strong>${esc(f.quem)}</strong><small>${esc(f.nome)} · ${esc(quando(f.d).toLowerCase())}</small></span></div>`; }).join('')}</div>`;
+  const fest = proximasFestas(FESTAS.length), t = UI.oxTab;
+  const card = (o, tipo) => `<button class="oxcard" data-act="ficha" data-tipo="${tipo}" data-k="${o.k}">${AXE.medalhao(o.k)}<strong>${esc(o.n)}</strong><span class="s">${esc(o.s)}</span><small>${esc(o.dia)}</small></button>`;
+  let body;
+  if (t === 'linhas') body = `<div class="galeria">${AXE.LINHAS.map(o => card(o, 'l')).join('')}</div>`;
+  else if (t === 'festas') body = `<div class="list">${fest.map(f => { const d = parse(f.d); return `<div class="row festa"><span class="dt"><b>${d.getDate()}</b><i>${MES_S[d.getMonth()]}</i></span><span class="main"><strong>${esc(f.quem)}</strong><small>${esc(f.nome)} · ${esc(quando(f.d).toLowerCase())}</small></span></div>`; }).join('')}</div>`;
+  else body = `<div class="galeria">${AXE.ORIXAS.map(o => card(o, 'o')).join('')}</div>`;
+  return backBtn('Orixás e linhas') + `<div class="seg">${segBtns([['orixas', 'Orixás'], ['linhas', 'Linhas'], ['festas', 'Festas']], t, 'oxtab')}</div>` + body +
+    `<p class="muted nota">Segue a tradição mais comum na Umbanda. Saudações, dias, comidas e ervas mudam de casa para casa: os fundamentos do seu pai ou mãe de santo vêm primeiro.</p>`;
 },
 ajustes() {
   const c = S.casa;
@@ -370,7 +373,7 @@ ajustes() {
     `<div class="card stack"><h3 style="margin:0">Senha do app</h3><p style="margin:0" class="muted">${S.pinHash ? 'O app pede uma senha de 4 números ao abrir.' : 'Proteja o caixa e os dados dos filhos com uma senha de 4 números.'}</p>${S.pinHash ? '<div class="grid2"><button class="btn ghost" data-act="pin-set">Trocar senha</button><button class="btn danger" data-act="pin-off">Tirar senha</button></div>' : '<button class="btn" data-act="pin-set">Criar senha</button>'}</div>` +
     `<div class="card stack"><h3 style="margin:0">Cópia de segurança</h3><p style="margin:0" class="muted">Os dados ficam só neste celular. Salve uma cópia e guarde no Drive ou mande para você no WhatsApp. Use a mesma cópia para passar tudo para outro celular.</p><div class="grid2"><button class="btn" data-act="bk-export">Salvar cópia</button><label class="btn ghost" for="bkfile">Restaurar cópia</label></div><input id="bkfile" type="file" accept="application/json,.json" hidden></div>` +
     `<div class="card stack"><h3 style="margin:0">Recomeçar</h3>${S.demo ? '<button class="btn danger block" data-act="demo-ask">Apagar os dados de exemplo</button>' : '<button class="btn danger block" data-act="seed-ask">Apagar tudo e ver os exemplos</button>'}</div>` +
-    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.0</p>`;
+    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.1</p>`;
 }
 };
 const menuRow = (v, i, a, b) => `<button class="row" data-act="mais-go" data-v="${v}"><span class="av">${ic(i)}</span><span class="main"><strong>${a}</strong><small>${b}</small></span>${ic('right')}</button>`;
@@ -534,6 +537,24 @@ function openEvent(id, keep) {
     <button class="btn ghost block" data-act="ev-edit" data-id="${id}">Editar gira</button></div>`);
   if (keep) $('#sheet').scrollTop = st;
 }
+function openFicha(tipo, k) {
+  const list = tipo === 'l' ? AXE.LINHAS : AXE.ORIXAS, o = list.find(x => x.k === k); if (!o) return;
+  const lista = (arr, cls) => `<ul class="tags ${cls}">${arr.map(x => `<li>${esc(x)}</li>`).join('')}</ul>`;
+  const linhas = [['Dia', o.dia], ['Cores', `<span class="cores">${contas(o.cores)}</span>${esc(o.cor)}`]];
+  if (o.elem) linhas.push(['Elemento', o.elem]);
+  if (o.orixa) linhas.push(['Orixá regente', o.orixa]);
+  if (o.sinc) linhas.push(['Sincretismo', o.sinc]);
+  if (o.festa) linhas.push(['Data festiva', o.festa]);
+  sheet(o.n, `<div class="ficha">
+    <div class="ficha-top">${AXE.medalhao(o.k, 220)}<span class="saud">${esc(o.s)}</span>${o.s2 ? `<span class="s2">${esc(o.s2)}</span>` : ''}</div>
+    <dl class="kv card">${linhas.map(([a, b]) => `<dt>${a}</dt><dd>${a === 'Cores' ? b : esc(b)}</dd>`).join('')}</dl>
+    <section><h3>${tipo === 'l' ? 'Quem são' : 'Regência'}</h3><p>${esc(o.reg)}</p></section>
+    <section><h3>${tipo === 'l' ? 'Oferendas' : 'Comidas e oferendas'}</h3>${lista(o.comidas, 'comida')}</section>
+    <section><h3>Ervas de trabalho</h3>${lista(o.ervas, 'erva')}</section>
+    <section><h3>${tipo === 'l' ? 'Elementos e símbolos' : 'Ferramentas'}</h3><p>${esc(o.ferr)}</p></section>
+    <button class="btn ghost block" data-act="ficha-share" data-tipo="${tipo}" data-k="${o.k}">${ic('share')}Enviar ficha</button>
+  </div>`);
+}
 function icsFor(e) {
   const d = e.data.replace(/-/g, ''), h = (e.hora || '20:00').replace(':', '') + '00';
   const endH = String(Math.min(23, Number((e.hora || '20:00').slice(0, 2)) + 3)).padStart(2, '0') + (e.hora || '20:00').slice(3, 5) + '00';
@@ -629,6 +650,9 @@ const ACT = {
   'ponto-edit': d => sheet('Editar ponto', pontoForm(byId(S.pontos, d.id))),
   'ponto-share': d => { const p = byId(S.pontos, d.id); if (p) share(`*${p.titulo}* (${(LINHAS[p.linha] || LINHAS.outros).nome})\n\n${p.letra}`, p.titulo); },
   'ponto-del': d => { S.pontos = S.pontos.filter(x => x.id !== d.id); save(); closeSheet(); render(true); toast('Ponto excluído'); },
+  oxtab: d => { UI.oxTab = d.v; render(); },
+  ficha: d => openFicha(d.tipo, d.k),
+  'ficha-share': d => { const o = (d.tipo === 'l' ? AXE.LINHAS : AXE.ORIXAS).find(x => x.k === d.k); if (o) share(`*${o.n}* — ${o.s}\n\nDia: ${o.dia}\nCores: ${o.cor}${o.sinc ? '\nSincretismo: ' + o.sinc : ''}${o.festa ? '\nData festiva: ' + o.festa : ''}\n\n${o.reg}\n\nComidas e oferendas: ${o.comidas.join(', ')}\nErvas: ${o.ervas.join(', ')}\n\n${casaCurta()}`, o.n); },
   'del-ask': () => { $('#delask').hidden = true; $('#delbox').hidden = false; },
   'del-no': () => { $('#delbox').hidden = true; $('#delask').hidden = false; },
   'demo-ask': () => sheet('Limpar exemplos', '<div class="stack"><p style="margin:0">Isso apaga os filhos, lançamentos, giras, estoque e avisos de exemplo. Os dados da casa em Ajustes continuam.</p><button class="btn danger block" data-act="demo-clear">Sim, limpar os exemplos</button><button class="btn ghost block" data-act="close">Cancelar</button></div>'),
