@@ -41,7 +41,11 @@ const LINHAS = {
 /* Imagem da gira: primeiro pelo nome escrito (Gira de Ogum, Gira de Caboclo…), senão pela linha escolhida */
 const IMG_LINHA = { caboclo: 'caboclo', pretovelho: 'pretovelho', boiadeiro: 'boiadeiro', crianca: 'crianca', marinheiro: 'marinheiro', baiano: 'baiano', cigano: 'cigano', exu: 'exu', pombagira: 'pombagira', malandro: 'malandro', orixas: 'oxala', desenv: 'caboclo', festa: 'oxala' };
 const IMG_NOME = [[/malandr/, 'malandro'], [/pomba/, 'pombagira'], [/exu/, 'exu'], [/cabocl/, 'caboclo'], [/pret[oa]s?[- ]?velh|almas/, 'pretovelho'], [/boiadeir/, 'boiadeiro'], [/crianc|eres?\b|ibeji|cosme/, 'crianca'], [/marinheir|maruj/, 'marinheiro'], [/baian/, 'baiano'], [/cigan/, 'cigano'], [/oxala/, 'oxala'], [/iemanja|yemanja/, 'iemanja'], [/oxum/, 'oxum'], [/ogum/, 'ogum'], [/oxoss/, 'oxossi'], [/xango/, 'xango'], [/iansa|oya/, 'iansa'], [/nana\b/, 'nana'], [/omulu|obalua/, 'omulu']];
-const giraImg = e => { const t = String(e.titulo || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); const hit = IMG_NOME.find(([r]) => r.test(t)); return hit ? hit[1] : IMG_LINHA[e.linha] || ''; };
+const giraImg = e => { const t = semAcento(e.titulo); const hit = IMG_NOME.find(([r]) => r.test(t)); return hit ? hit[1] : IMG_LINHA[e.linha] || ''; };
+const semAcento = t => String(t || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+const ehFesta = e => e.linha === 'festa' || /festa|obrigac|dia de |dia dos |dia das |aniversario|natal/.test(semAcento(e.titulo));
+const festaKey = quem => { const t = semAcento(quem); const hit = IMG_NOME.find(([r]) => r.test(t)); return hit ? hit[1] : 'oxala'; };
+const banImg = (k, f) => k ? `<img class="ban" src="ban/${k}${f ? '-f' : ''}.jpg" alt="" aria-hidden="true" loading="lazy">` : '';
 const fotoBg = (k, cls) => k ? `<img class="${cls}" src="img/${k}.jpg" alt="" aria-hidden="true">` : '';
 const contas = (cores, cls) => cores.map(c => `<i class="conta ${cls || ''}" style="background:${c}"></i>`).join('');
 const linhaChip = k => { const l = LINHAS[k] || LINHAS.outros; return `<em class="chip">${contas(l.cores)}${esc(l.nome)}</em>`; };
@@ -294,11 +298,11 @@ home() {
   const aniv = anivMes(), festas = proximasFestas(2);
   const saudacao = `<section class="dia">${fotoBg(dia.img, 'foto')}<span class="eyebrow">${esc(DIA_L[now.getDay()])} · dia de ${esc(dia.quem)}</span><span class="saud">${esc(dia.saud)}</span><span class="linhadia">Linha do dia: <b>${esc(dia.linha)}</b></span><p>Saravá, ${esc(S.casa.dirigente ? S.casa.dirigente.split(' ')[0] : 'filho de fé')}! Que o axé da casa siga firme.</p><span class="contas">${contas(dia.cores)}</span></section>`;
   const hero = nx
-    ? `<section class="hero${giraImg(nx) ? ' comfoto' : ''}" style="--ac:${(LINHAS[nx.linha] || LINHAS.outros).cores[0]}">${giraImg(nx) ? fotoBg(giraImg(nx), 'foto') : RISCADO('riscado')}<span class="lbl">Próxima gira</span><strong>${esc(nx.titulo)}</strong><span class="quando">${esc(quando(nx.data))}</span><p>${esc(fmtLong(nx.data))} · ${esc(nx.hora || '')}${nx.local ? ' · ' + esc(nx.local) : ''}</p><div class="acts"><button class="btn sm" data-act="ev-open" data-id="${nx.id}">Abrir gira</button><button class="btn sm ghost" data-act="ev-share" data-id="${nx.id}">${ic('share')}Avisar a casa</button></div></section>`
+    ? `<section class="hero${giraImg(nx) ? ' comfoto' : ''}${ehFesta(nx) ? ' ehfesta' : ''}" style="--ac:${(LINHAS[nx.linha] || LINHAS.outros).cores[0]}">${giraImg(nx) ? banImg(giraImg(nx), ehFesta(nx)) : RISCADO('riscado')}<span class="lbl">${ehFesta(nx) ? 'Próxima festa' : 'Próxima gira'}</span><strong>${esc(nx.titulo)}</strong><span class="quando">${esc(quando(nx.data))}</span><p>${esc(fmtLong(nx.data))} · ${esc(nx.hora || '')}${nx.local ? ' · ' + esc(nx.local) : ''}</p><div class="acts"><button class="btn sm" data-act="ev-open" data-id="${nx.id}">${ehFesta(nx) ? 'Abrir festa' : 'Abrir gira'}</button><button class="btn sm ghost" data-act="ev-share" data-id="${nx.id}">${ic('share')}Avisar a casa</button></div></section>`
     : `<section class="hero">${RISCADO('riscado')}<span class="lbl">Próxima gira</span><strong>Nenhuma gira marcada</strong><p>Marque a próxima gira para avisar a corrente.</p><div class="acts"><button class="btn sm" data-act="ev-new">Marcar gira</button></div></section>`;
   const dueRows = pend.slice(0, 3).map(x => `<div class="row"><span class="av">${esc(initials(x.nome))}</span><span class="main"><strong>${esc(x.nome)}</strong><small class="num">${brl(x.mensal)}</small></span><button class="btn sm" data-act="receber" data-mid="${x.id}" data-m="${m}">Receber</button></div>`).join('');
   const anivRows = aniv.map(x => { const d = Number(x.nasc.slice(8)); const hoje = d === now.getDate(); return `<button class="row" data-act="member-open" data-id="${x.id}"><span class="av bday">${ic('bolo')}</span><span class="main"><strong>${esc(x.nome)}</strong><small>${hoje ? 'Faz aniversário hoje!' : 'Dia ' + d + ' de ' + MES_L[now.getMonth()]}</small></span>${hoje ? '<em class="chip gold">Hoje</em>' : ''}</button>`; }).join('');
-  const festaRows = festas.map(f => { const d = parse(f.d); return `<div class="row festa"><span class="dt"><b>${d.getDate()}</b><i>${MES_S[d.getMonth()]}</i></span><span class="main"><strong>${esc(f.quem)}</strong><small>${esc(f.nome)} · ${esc(quando(f.d).toLowerCase())}</small></span></div>`; }).join('');
+  const festaRows = festas.map(f => { const d = parse(f.d); return `<div class="row festa comban">${banImg(festaKey(f.quem), true)}<span class="dt"><b>${d.getDate()}</b><i>${MES_S[d.getMonth()]}</i></span><span class="main"><strong>${esc(f.quem)}</strong><small>${esc(f.nome)} · ${esc(quando(f.d).toLowerCase())}</small></span></div>`; }).join('');
   return demoBanner() + installBanner() + saudacao + hero + videoCard() +
     `<div class="grid2">
       <button class="stat" data-act="go" data-tab="caixa"><span>Saldo de ${MES_L[now.getMonth()]}</span><b class="${t.s < 0 ? 'neg' : ''}">${brl(t.s)}</b></button>
@@ -375,7 +379,7 @@ orixas() {
   const card = (o, tipo) => `<button class="oxcard" data-act="ficha" data-tipo="${tipo}" data-k="${o.k}"><img class="estampa" src="img/${o.k}.jpg" alt="" width="300" height="450" loading="lazy"><strong>${esc(o.n)}</strong><span class="s">${esc(o.s)}</span><small>${esc(o.dia)}</small></button>`;
   let body;
   if (t === 'linhas') body = `<div class="galeria">${AXE.LINHAS.map(o => card(o, 'l')).join('')}</div>`;
-  else if (t === 'festas') body = `<div class="list">${fest.map(f => { const d = parse(f.d); return `<div class="row festa"><span class="dt"><b>${d.getDate()}</b><i>${MES_S[d.getMonth()]}</i></span><span class="main"><strong>${esc(f.quem)}</strong><small>${esc(f.nome)} · ${esc(quando(f.d).toLowerCase())}</small></span></div>`; }).join('')}</div>`;
+  else if (t === 'festas') body = `<div class="list">${fest.map(f => { const d = parse(f.d); return `<div class="row festa comban">${banImg(festaKey(f.quem), true)}<span class="dt"><b>${d.getDate()}</b><i>${MES_S[d.getMonth()]}</i></span><span class="main"><strong>${esc(f.quem)}</strong><small>${esc(f.nome)} · ${esc(quando(f.d).toLowerCase())}</small></span></div>`; }).join('')}</div>`;
   else body = `<div class="galeria">${AXE.ORIXAS.map(o => card(o, 'o')).join('')}</div>`;
   return backBtn('Orixás e linhas') + videoCard() + `<div class="seg">${segBtns([['orixas', 'Orixás'], ['linhas', 'Linhas'], ['festas', 'Festas']], t, 'oxtab')}</div>` + body +
     `<p class="muted nota">Segue a tradição mais comum na Umbanda. Saudações, dias, comidas e ervas mudam de casa para casa: os fundamentos do seu pai ou mãe de santo vêm primeiro.</p>`;
@@ -394,7 +398,7 @@ ajustes() {
     `<div class="card stack"><h3 style="margin:0">Senha do app</h3><p style="margin:0" class="muted">${S.pinHash ? 'O app pede uma senha de 4 números ao abrir.' : 'Proteja o caixa e os dados dos filhos com uma senha de 4 números.'}</p>${S.pinHash ? '<div class="grid2"><button class="btn ghost" data-act="pin-set">Trocar senha</button><button class="btn danger" data-act="pin-off">Tirar senha</button></div>' : '<button class="btn" data-act="pin-set">Criar senha</button>'}</div>` +
     `<div class="card stack"><h3 style="margin:0">Cópia de segurança</h3><p style="margin:0" class="muted">Os dados ficam só neste celular. Salve uma cópia e guarde no Drive ou mande para você no WhatsApp. Use a mesma cópia para passar tudo para outro celular.</p><div class="grid2"><button class="btn" data-act="bk-export">Salvar cópia</button><label class="btn ghost" for="bkfile">Restaurar cópia</label></div><input id="bkfile" type="file" accept="application/json,.json" hidden></div>` +
     `<div class="card stack"><h3 style="margin:0">Recomeçar</h3>${S.demo ? '<button class="btn danger block" data-act="demo-ask">Apagar os dados de exemplo</button>' : '<button class="btn danger block" data-act="seed-ask">Apagar tudo e ver os exemplos</button>'}</div>` +
-    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.9</p>`;
+    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.10</p>`;
 }
 };
 const menuRow = (v, i, a, b) => `<button class="row" data-act="mais-go" data-v="${v}"><span class="av">${ic(i)}</span><span class="main"><strong>${a}</strong><small>${b}</small></span>${ic('right')}</button>`;
@@ -419,8 +423,8 @@ function filhosList() {
 }
 function evRow(e) {
   const d = parse(e.data), past = e.data < today(), cnt = (S.pres[e.id] || []).length, at = (S.fila[e.id] || []).length;
-  const gi = giraImg(e);
-  return `<button class="row evrow${gi ? ' comfoto' : ''}${past ? ' passada' : ''}" style="--ac:${(LINHAS[e.linha] || LINHAS.outros).cores[0]}" data-act="ev-open" data-id="${e.id}">${fotoBg(gi, 'foto')}<span class="dt"><b>${d.getDate()}</b><i>${MES_S[d.getMonth()]}</i></span><span class="evm"><strong>${esc(e.titulo)}</strong><small>${DIA_S[d.getDay()]} · ${esc(e.hora || '')}${past ? '' : ' · ' + esc(quando(e.data).toLowerCase())}</small>${linhaChip(e.linha)}</span>${past ? `<span class="cnt">${at || cnt}<small>${at ? 'atendidos' : 'presentes'}</small></span>` : ''}</button>`;
+  const gi = giraImg(e), fe = ehFesta(e);
+  return `<button class="row evrow${gi ? ' comfoto' : ''}${fe ? ' ehfesta' : ''}${past ? ' passada' : ''}" style="--ac:${(LINHAS[e.linha] || LINHAS.outros).cores[0]}" data-act="ev-open" data-id="${e.id}">${banImg(gi, fe)}<span class="dt"><b>${d.getDate()}</b><i>${MES_S[d.getMonth()]}</i></span><span class="evm"><strong>${esc(e.titulo)}</strong><small>${DIA_S[d.getDay()]} · ${esc(e.hora || '')}${past ? '' : ' · ' + esc(quando(e.data).toLowerCase())}</small>${linhaChip(e.linha)}${fe && e.linha !== 'festa' ? '<em class="chip gold">Festa</em>' : ''}</span>${past ? `<span class="cnt">${at || cnt}<small>${at ? 'atendidos' : 'presentes'}</small></span>` : ''}</button>`;
 }
 function txRow(t) {
   const inn = t.tipo === 'in';
@@ -657,9 +661,9 @@ function openEvent(id, keep) {
     ${fila.length ? `<div class="list">${fila.map(f => { const md = f.mid ? byId(S.members, f.mid) : null; return `<button class="row" data-act="fila-step" data-eid="${id}" data-id="${f.id}"><span class="sn ${f.status === 'feito' ? 'done' : f.status === 'agora' ? 'now' : ''}">${pad(f.senha)}</span><span class="main"><strong>${esc(f.nome)}</strong><small>${esc([md ? md.nome : '', f.obs].filter(Boolean).join(' · ') || 'Sem observação')}</small></span>${f.status === 'feito' ? '<em class="chip ok">Atendido</em>' : f.status === 'agora' ? '<em class="chip gold">Na vez</em>' : '<em class="chip mute">Aguardando</em>'}</button>`; }).join('')}</div>` : empty('Ninguém na fila', 'Dê senha aos consulentes conforme forem chegando.')}
     ${atual ? `<button class="btn ghost block" data-act="telao" data-eid="${id}">Mostrar senha em tela cheia</button>` : ''}`;
   const chamadaHtml = act.length ? `<p class="muted" style="margin:0">${pres.length} de ${act.length} presentes. Toque no nome para marcar.</p><div class="pres">${act.map(x => { const on = pres.includes(x.id); return `<button type="button" data-act="presence" data-eid="${id}" data-mid="${x.id}" aria-pressed="${on}"><span class="box">${on ? ic('check') : ''}</span><span><strong>${esc(x.nome)}</strong><br><small class="muted">${esc(x.cargo)}</small></span></button>`; }).join('')}</div>` : empty('Sem filhos ativos', 'Cadastre os filhos da casa primeiro.');
-  const gi = giraImg(e);
+  const gi = giraImg(e), fe = ehFesta(e);
   sheet(e.titulo, `<div class="stack">
-    ${gi ? `<div class="evbanner" style="--ac:${(LINHAS[e.linha] || LINHAS.outros).cores[0]}">${fotoBg(gi, 'foto')}<span class="lbl">${esc(gNome(e.linha) === 'Outra linha' ? (LINHAS[e.linha] || LINHAS.outros).nome : gNome(e.linha))}</span><strong>${esc(e.titulo)}</strong><span class="q">${esc(fmtLong(e.data))} · ${esc(e.hora || '')}</span></div>` : ''}
+    ${gi ? `<div class="evbanner${fe ? ' ehfesta' : ''}" style="--ac:${(LINHAS[e.linha] || LINHAS.outros).cores[0]}">${banImg(gi, fe)}<span class="lbl">${fe ? 'Festa · ' : ''}${esc((LINHAS[e.linha] || LINHAS.outros).nome)}</span><strong>${esc(e.titulo)}</strong><span class="q">${esc(fmtLong(e.data))} · ${esc(e.hora || '')}</span></div>` : ''}
     <dl class="kv card"><dt>Quando</dt><dd>${esc(fmtLong(e.data))} · ${esc(e.hora || '')}</dd><dt>Linha</dt><dd>${linhaChip(e.linha)}</dd><dt>Local</dt><dd>${esc(e.local || '—')}</dd>${e.obs ? `<dt>Recado</dt><dd>${esc(e.obs)}</dd>` : ''}</dl>
     <div class="grid2"><button class="btn wa" data-act="ev-share" data-id="${id}">${ic('share')}Avisar a casa</button><button class="btn ghost" data-act="ev-ics" data-id="${id}">${ic('cal')}Pôr na agenda</button></div>
     ${tabs}${UI.evTab === 'fila' ? filaHtml : chamadaHtml}
@@ -945,6 +949,8 @@ render();
 if (S.pinHash) lockScreen('open');
 if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
-  navigator.serviceWorker.register('sw.js').catch(() => {});
+  const tinha = !!navigator.serviceWorker.controller; let recarregou = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (tinha && !recarregou) { recarregou = true; location.reload(); } });
+  navigator.serviceWorker.register('sw.js').then(r => r.update && r.update()).catch(() => {});
 }
 })();

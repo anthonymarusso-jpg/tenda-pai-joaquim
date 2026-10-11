@@ -408,3 +408,26 @@ nav{flex:none;display:grid;grid-template-columns:repeat(5,1fr);background:var(--
   .evbanner.anim{animation-name:aHero}
   .evbanner.anim .foto{animation:aKen 1.3s cubic-bezier(.16,1,.3,1) both}
 }
+
+/* banners das giras e das festas (ban/<linha>.jpg e ban/<linha>-f.jpg) */
+.ban{position:absolute!important;inset:0;width:100%!important;height:100%!important;max-width:none!important;object-fit:cover;object-position:right center;pointer-events:none;z-index:0!important;text-shadow:none}
+.hero.comfoto{min-height:210px;background:var(--night)}
+.hero.comfoto::after{background:linear-gradient(90deg,color-mix(in srgb,var(--night) 70%,transparent) 0%,color-mix(in srgb,var(--night) 30%,transparent) 50%,transparent 75%)}
+.hero.ehfesta .lbl{color:#ffe08a}
+.hero.ehfesta{box-shadow:0 0 0 2px #e9be5c,0 10px 30px rgba(233,190,92,.25)}
+.evrow.comfoto,.row.comban{position:relative;overflow:hidden;min-height:100px;background:var(--night);color:#fff;border-color:transparent}
+.evrow.comfoto::after,.row.comban::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,color-mix(in srgb,var(--night) 75%,transparent) 0%,color-mix(in srgb,var(--night) 35%,transparent) 55%,transparent 80%);pointer-events:none}
+.evrow.comfoto>*:not(.ban),.row.comban>*:not(.ban){position:relative;z-index:1}
+.evrow.comfoto .evm small,.row.comban small{color:rgba(255,255,255,.85)}
+.evrow.comfoto .evm,.row.comban .main{padding-right:28%;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.evrow.comfoto .cnt{background:rgba(10,17,48,.6);color:#fff}
+.evrow.ehfesta,.row.comban{box-shadow:0 0 0 1.5px #e9be5c}
+.evrow.passada .ban{filter:grayscale(.6) brightness(.85)}
+.row.comban .dt{background:linear-gradient(160deg,#f7d77e,#b8860b);color:#2a1c00}
+.evbanner{min-height:190px}
+.evbanner.ehfesta{box-shadow:0 0 0 2px #e9be5c}
+.evbanner.ehfesta .lbl{color:#ffe08a}
+@media (prefers-reduced-motion:no-preference){
+  .hero.anim .ban,.evbanner.anim .ban{animation:aKen 1.4s cubic-bezier(.16,1,.3,1) both}
+  .evrow.anim .ban,.row.comban.anim .ban{animation:aFromR 1s cubic-bezier(.16,1,.3,1) both calc(var(--i,0) * 60ms + .1s)}
+}
