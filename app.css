@@ -285,3 +285,18 @@ nav{flex:none;display:grid;grid-template-columns:repeat(5,1fr);background:var(--
 .vidbar{position:absolute;top:0;left:0;right:0;display:flex;justify-content:space-between;align-items:center;gap:10px;padding:calc(10px + env(safe-area-inset-top,0px)) 12px 10px;background:linear-gradient(rgba(0,0,0,.6),transparent)}
 .vidbar .iconbtn{color:#fff;background:rgba(255,255,255,.14)}
 .vidbar .btn{background:#25d366;border-color:#25d366;color:#fff}
+
+/* fotos da linha: no dia e na próxima gira */
+.dia .foto,.hero .foto{position:absolute;top:0;right:0;bottom:0;height:100%;width:52%;object-fit:cover;object-position:50% 16%;pointer-events:none;-webkit-mask-image:linear-gradient(to right,transparent 0%,#000 60%);mask-image:linear-gradient(to right,transparent 0%,#000 60%)}
+.dia .foto{width:46%;opacity:.95}
+.dia>*:not(.foto){position:relative;max-width:66%}
+.dia .eyebrow{max-width:62%}
+.dia .linhadia{font-size:14.5px;color:var(--fg);margin-top:2px}
+.dia .linhadia b{font-weight:800;color:var(--brand)}
+.hero.comfoto{min-height:200px;background:radial-gradient(120% 90% at 100% 0%,color-mix(in srgb,var(--ac,#1a3a9c) 38%,transparent),transparent 60%),linear-gradient(150deg,var(--night) 0%,var(--night2) 100%)}
+.hero.comfoto .foto{width:56%;opacity:.92}
+.hero.comfoto::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,var(--night) 0%,color-mix(in srgb,var(--night) 55%,transparent) 48%,transparent 75%),linear-gradient(0deg,color-mix(in srgb,var(--night) 55%,transparent),transparent 45%);pointer-events:none}
+.hero.comfoto>*:not(.foto){position:relative;z-index:1;text-shadow:0 1px 3px rgba(0,0,0,.55)}
+.hero.comfoto strong{max-width:70%}
+.hero.comfoto p{max-width:78%}
+.hero.comfoto .btn{text-shadow:none}

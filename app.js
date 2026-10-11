@@ -31,23 +31,30 @@ const LINHAS = {
   baiano:    { nome: 'Baianos',             gira: 'Gira de Baianos',             cores: ['#f2c12e'] },
   cigano:    { nome: 'Ciganos',             gira: 'Gira de Ciganos',             cores: ['#7b3fa0', '#f2c12e'] },
   exu:       { nome: 'Exus e Pombagiras',   gira: 'Gira de Exu',                 cores: ['#c8302a', '#111111'] },
+  pombagira: { nome: 'Pombagiras',          gira: 'Gira de Pombagira',           cores: ['#c8302a', '#111111'] },
+  malandro:  { nome: 'Malandros',           gira: 'Gira de Malandros',           cores: ['#ffffff', '#c8302a'] },
   orixas:    { nome: 'Orixás',              gira: 'Gira de Orixás',              cores: ['#ffffff', '#d9a400'] },
   desenv:    { nome: 'Desenvolvimento',     gira: 'Desenvolvimento mediúnico',   cores: ['#1a3a9c'] },
   festa:     { nome: 'Festa / Obrigação',   gira: 'Festa',                       cores: ['#d9a400'] },
   outros:    { nome: 'Faxina / Reunião',    gira: 'Reunião da casa',             cores: ['#9aa3b5'] }
 };
+/* Imagem da gira: primeiro pelo nome escrito (Gira de Ogum, Gira de Caboclo…), senão pela linha escolhida */
+const IMG_LINHA = { caboclo: 'caboclo', pretovelho: 'pretovelho', boiadeiro: 'boiadeiro', crianca: 'crianca', marinheiro: 'marinheiro', baiano: 'baiano', cigano: 'cigano', exu: 'exu', pombagira: 'pombagira', malandro: 'malandro', orixas: 'oxala', desenv: 'caboclo', festa: 'oxala' };
+const IMG_NOME = [[/malandr/, 'malandro'], [/pomba/, 'pombagira'], [/exu/, 'exu'], [/cabocl/, 'caboclo'], [/pret[oa]s?[- ]?velh|almas/, 'pretovelho'], [/boiadeir/, 'boiadeiro'], [/crianc|eres?\b|ibeji|cosme/, 'crianca'], [/marinheir|maruj/, 'marinheiro'], [/baian/, 'baiano'], [/cigan/, 'cigano'], [/oxala/, 'oxala'], [/iemanja|yemanja/, 'iemanja'], [/oxum/, 'oxum'], [/ogum/, 'ogum'], [/oxoss/, 'oxossi'], [/xango/, 'xango'], [/iansa|oya/, 'iansa'], [/nana\b/, 'nana'], [/omulu|obalua/, 'omulu']];
+const giraImg = e => { const t = String(e.titulo || '').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); const hit = IMG_NOME.find(([r]) => r.test(t)); return hit ? hit[1] : IMG_LINHA[e.linha] || ''; };
+const fotoBg = (k, cls) => k ? `<img class="${cls}" src="img/${k}.jpg" alt="" aria-hidden="true">` : '';
 const contas = (cores, cls) => cores.map(c => `<i class="conta ${cls || ''}" style="background:${c}"></i>`).join('');
 const linhaChip = k => { const l = LINHAS[k] || LINHAS.outros; return `<em class="chip">${contas(l.cores)}${esc(l.nome)}</em>`; };
 
 /* Orixá regente do dia — tradição mais comum; cada casa tem seus fundamentos */
 const DIAS_ORIXA = [
-  { quem: 'Ibeji e as Crianças', saud: 'Oni Beijada!', cores: ['#f08cbc', '#6fb6ea'] },
-  { quem: 'Exu, Omulu e as Almas', saud: 'Atotô, Obaluaiê!', cores: ['#111111', '#ffffff', '#c8302a'] },
-  { quem: 'Ogum', saud: 'Ogunhê, meu Pai!', cores: ['#c8302a', '#1f3f8f'] },
-  { quem: 'Xangô e Iansã', saud: 'Kaô Kabecilê!', cores: ['#8a5a2b', '#f2c12e'] },
-  { quem: 'Oxóssi', saud: 'Okê Arô!', cores: ['#2f8f46'] },
-  { quem: 'Oxalá', saud: 'Epa Babá!', cores: ['#ffffff'] },
-  { quem: 'Iemanjá, Oxum e Nanã', saud: 'Odoyá! Ora yê yê ô!', cores: ['#6fb6ea', '#f2c12e', '#9a7bc8'] }
+  { quem: 'Ibeji e as Crianças', saud: 'Oni Beijada!', cores: ['#f08cbc', '#6fb6ea'], linha: 'Crianças (Erês)', img: 'crianca' },
+  { quem: 'Exu, Omulu e as Almas', saud: 'Atotô, Obaluaiê!', cores: ['#111111', '#ffffff', '#c8302a'], linha: 'Pretos-Velhos e Almas', img: 'pretovelho' },
+  { quem: 'Ogum', saud: 'Ogunhê, meu Pai!', cores: ['#c8302a', '#1f3f8f'], linha: 'Ogum, o guerreiro', img: 'ogum' },
+  { quem: 'Xangô e Iansã', saud: 'Kaô Kabecilê!', cores: ['#8a5a2b', '#f2c12e'], linha: 'Xangô, a justiça', img: 'xango' },
+  { quem: 'Oxóssi', saud: 'Okê Arô!', cores: ['#2f8f46'], linha: 'Caboclos e Oxóssi', img: 'caboclo' },
+  { quem: 'Oxalá', saud: 'Epa Babá!', cores: ['#ffffff'], linha: 'Oxalá, a fé', img: 'oxala' },
+  { quem: 'Iemanjá, Oxum e Nanã', saud: 'Odoyá! Ora yê yê ô!', cores: ['#6fb6ea', '#f2c12e', '#9a7bc8'], linha: 'Povo d’Água: Iemanjá e Marinheiros', img: 'iemanja' }
 ];
 const ORIXAS = [
   { n: 'Oxalá', s: 'Epa Babá!', cores: ['#ffffff'], cor: 'Branco', dia: 'Sexta-feira', dom: 'A fé, a paz e a criação', sinc: 'Jesus Cristo (Senhor do Bonfim)' },
@@ -175,7 +182,7 @@ function guessLinha(t) {
   t = t.toLowerCase();
   if (t.includes('caboclo')) return 'caboclo'; if (t.includes('preto')) return 'pretovelho'; if (t.includes('boiadeiro')) return 'boiadeiro';
   if (t.includes('crian') || t.includes('erê')) return 'crianca'; if (t.includes('marinheiro')) return 'marinheiro'; if (t.includes('baian')) return 'baiano';
-  if (t.includes('exu') || t.includes('pomba')) return 'exu'; if (t.includes('cigan')) return 'cigano'; if (t.includes('desenv')) return 'desenv';
+  if (t.includes('malandr')) return 'malandro'; if (t.includes('pomba')) return 'pombagira'; if (t.includes('exu')) return 'exu'; if (t.includes('cigan')) return 'cigano'; if (t.includes('desenv')) return 'desenv';
   if (t.includes('festa') || t.includes('obriga')) return 'festa'; return 'outros';
 }
 function load() {
@@ -272,9 +279,9 @@ home() {
   const now = new Date(), m = ym(now), nx = nextEvents()[0], t = totals(m), pend = due(m);
   const low = S.stock.filter(i => i.qtd <= i.min), n = S.notices[0], dia = DIAS_ORIXA[now.getDay()];
   const aniv = anivMes(), festas = proximasFestas(2);
-  const saudacao = `<section class="dia"><span class="eyebrow">${esc(DIA_L[now.getDay()])} · dia de ${esc(dia.quem)}</span><span class="saud">${esc(dia.saud)}</span><p>Saravá, ${esc(S.casa.dirigente ? S.casa.dirigente.split(' ')[0] : 'filho de fé')}! Que o axé da casa siga firme.</p><span class="contas">${contas(dia.cores)}</span></section>`;
+  const saudacao = `<section class="dia">${fotoBg(dia.img, 'foto')}<span class="eyebrow">${esc(DIA_L[now.getDay()])} · dia de ${esc(dia.quem)}</span><span class="saud">${esc(dia.saud)}</span><span class="linhadia">Linha do dia: <b>${esc(dia.linha)}</b></span><p>Saravá, ${esc(S.casa.dirigente ? S.casa.dirigente.split(' ')[0] : 'filho de fé')}! Que o axé da casa siga firme.</p><span class="contas">${contas(dia.cores)}</span></section>`;
   const hero = nx
-    ? `<section class="hero">${RISCADO('riscado')}<span class="lbl">Próxima gira</span><strong>${esc(nx.titulo)}</strong><span class="quando">${esc(quando(nx.data))}</span><p>${esc(fmtLong(nx.data))} · ${esc(nx.hora || '')}${nx.local ? ' · ' + esc(nx.local) : ''}</p><div class="acts"><button class="btn sm" data-act="ev-open" data-id="${nx.id}">Abrir gira</button><button class="btn sm ghost" data-act="ev-share" data-id="${nx.id}">${ic('share')}Avisar a casa</button></div></section>`
+    ? `<section class="hero${giraImg(nx) ? ' comfoto' : ''}" style="--ac:${(LINHAS[nx.linha] || LINHAS.outros).cores[0]}">${giraImg(nx) ? fotoBg(giraImg(nx), 'foto') : RISCADO('riscado')}<span class="lbl">Próxima gira</span><strong>${esc(nx.titulo)}</strong><span class="quando">${esc(quando(nx.data))}</span><p>${esc(fmtLong(nx.data))} · ${esc(nx.hora || '')}${nx.local ? ' · ' + esc(nx.local) : ''}</p><div class="acts"><button class="btn sm" data-act="ev-open" data-id="${nx.id}">Abrir gira</button><button class="btn sm ghost" data-act="ev-share" data-id="${nx.id}">${ic('share')}Avisar a casa</button></div></section>`
     : `<section class="hero">${RISCADO('riscado')}<span class="lbl">Próxima gira</span><strong>Nenhuma gira marcada</strong><p>Marque a próxima gira para avisar a corrente.</p><div class="acts"><button class="btn sm" data-act="ev-new">Marcar gira</button></div></section>`;
   const dueRows = pend.slice(0, 3).map(x => `<div class="row"><span class="av">${esc(initials(x.nome))}</span><span class="main"><strong>${esc(x.nome)}</strong><small class="num">${brl(x.mensal)}</small></span><button class="btn sm" data-act="receber" data-mid="${x.id}" data-m="${m}">Receber</button></div>`).join('');
   const anivRows = aniv.map(x => { const d = Number(x.nasc.slice(8)); const hoje = d === now.getDate(); return `<button class="row" data-act="member-open" data-id="${x.id}"><span class="av bday">${ic('bolo')}</span><span class="main"><strong>${esc(x.nome)}</strong><small>${hoje ? 'Faz aniversário hoje!' : 'Dia ' + d + ' de ' + MES_L[now.getMonth()]}</small></span>${hoje ? '<em class="chip gold">Hoje</em>' : ''}</button>`; }).join('');
@@ -374,7 +381,7 @@ ajustes() {
     `<div class="card stack"><h3 style="margin:0">Senha do app</h3><p style="margin:0" class="muted">${S.pinHash ? 'O app pede uma senha de 4 números ao abrir.' : 'Proteja o caixa e os dados dos filhos com uma senha de 4 números.'}</p>${S.pinHash ? '<div class="grid2"><button class="btn ghost" data-act="pin-set">Trocar senha</button><button class="btn danger" data-act="pin-off">Tirar senha</button></div>' : '<button class="btn" data-act="pin-set">Criar senha</button>'}</div>` +
     `<div class="card stack"><h3 style="margin:0">Cópia de segurança</h3><p style="margin:0" class="muted">Os dados ficam só neste celular. Salve uma cópia e guarde no Drive ou mande para você no WhatsApp. Use a mesma cópia para passar tudo para outro celular.</p><div class="grid2"><button class="btn" data-act="bk-export">Salvar cópia</button><label class="btn ghost" for="bkfile">Restaurar cópia</label></div><input id="bkfile" type="file" accept="application/json,.json" hidden></div>` +
     `<div class="card stack"><h3 style="margin:0">Recomeçar</h3>${S.demo ? '<button class="btn danger block" data-act="demo-ask">Apagar os dados de exemplo</button>' : '<button class="btn danger block" data-act="seed-ask">Apagar tudo e ver os exemplos</button>'}</div>` +
-    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.4</p>`;
+    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.5</p>`;
 }
 };
 const menuRow = (v, i, a, b) => `<button class="row" data-act="mais-go" data-v="${v}"><span class="av">${ic(i)}</span><span class="main"><strong>${a}</strong><small>${b}</small></span>${ic('right')}</button>`;
@@ -782,6 +789,12 @@ window.addEventListener('popstate', () => {
   if (UI.tab !== 'home') { UI.tab = 'home'; render(); guard(); return; }
   history.back();
 });
+
+/* Vira o dia com o app aberto: atualiza o orixá/linha do dia e a próxima gira */
+let diaVisto = new Date().toDateString();
+const checaDia = () => { const d = new Date().toDateString(); if (d !== diaVisto) { diaVisto = d; if (UI.tab === 'home' && !sheetOpen()) render(true); } };
+setInterval(checaDia, 60000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) checaDia(); });
 
 /* ---------- início ---------- */
 $('[data-act="close"]').innerHTML = ic('x');
