@@ -250,6 +250,7 @@ function render(keep) {
   $('#casaNome').textContent = casaCurta().replace(/^Tenda de Umbanda\s*/i, '') || casaCurta();
   v.scrollTop = keep ? st : 0;
 }
+const videoCard = () => `<button class="videocard" data-act="vid-open"><span class="th"><img src="video/capa.jpg" alt="" width="76" height="135" loading="lazy"><span class="pl"></span></span><span class="tx"><small>Vídeo da casa</small><strong>Orixás e Linhas de Umbanda</strong><span>Todos os orixás e guias com saudação, dia e cores.</span></span></button>`;
 const demoBanner = () => S.demo ? '<div class="banner"><span>Estes são dados de exemplo. Apague quando for usar com a sua casa.</span><button class="btn" data-act="demo-ask">Limpar exemplos</button></div>' : '';
 
 /* ---------- instalação ---------- */
@@ -278,7 +279,7 @@ home() {
   const dueRows = pend.slice(0, 3).map(x => `<div class="row"><span class="av">${esc(initials(x.nome))}</span><span class="main"><strong>${esc(x.nome)}</strong><small class="num">${brl(x.mensal)}</small></span><button class="btn sm" data-act="receber" data-mid="${x.id}" data-m="${m}">Receber</button></div>`).join('');
   const anivRows = aniv.map(x => { const d = Number(x.nasc.slice(8)); const hoje = d === now.getDate(); return `<button class="row" data-act="member-open" data-id="${x.id}"><span class="av bday">${ic('bolo')}</span><span class="main"><strong>${esc(x.nome)}</strong><small>${hoje ? 'Faz aniversário hoje!' : 'Dia ' + d + ' de ' + MES_L[now.getMonth()]}</small></span>${hoje ? '<em class="chip gold">Hoje</em>' : ''}</button>`; }).join('');
   const festaRows = festas.map(f => { const d = parse(f.d); return `<div class="row festa"><span class="dt"><b>${d.getDate()}</b><i>${MES_S[d.getMonth()]}</i></span><span class="main"><strong>${esc(f.quem)}</strong><small>${esc(f.nome)} · ${esc(quando(f.d).toLowerCase())}</small></span></div>`; }).join('');
-  return demoBanner() + installBanner() + saudacao + hero +
+  return demoBanner() + installBanner() + saudacao + hero + videoCard() +
     `<div class="grid2">
       <button class="stat" data-act="go" data-tab="caixa"><span>Saldo de ${MES_L[now.getMonth()]}</span><b class="${t.s < 0 ? 'neg' : ''}">${brl(t.s)}</b></button>
       <button class="stat${pend.length ? ' alert' : ''}" data-act="go" data-tab="caixa"><span>Mensalidades em aberto</span><b>${pend.length}</b></button>
@@ -356,7 +357,7 @@ orixas() {
   if (t === 'linhas') body = `<div class="galeria">${AXE.LINHAS.map(o => card(o, 'l')).join('')}</div>`;
   else if (t === 'festas') body = `<div class="list">${fest.map(f => { const d = parse(f.d); return `<div class="row festa"><span class="dt"><b>${d.getDate()}</b><i>${MES_S[d.getMonth()]}</i></span><span class="main"><strong>${esc(f.quem)}</strong><small>${esc(f.nome)} · ${esc(quando(f.d).toLowerCase())}</small></span></div>`; }).join('')}</div>`;
   else body = `<div class="galeria">${AXE.ORIXAS.map(o => card(o, 'o')).join('')}</div>`;
-  return backBtn('Orixás e linhas') + `<div class="seg">${segBtns([['orixas', 'Orixás'], ['linhas', 'Linhas'], ['festas', 'Festas']], t, 'oxtab')}</div>` + body +
+  return backBtn('Orixás e linhas') + videoCard() + `<div class="seg">${segBtns([['orixas', 'Orixás'], ['linhas', 'Linhas'], ['festas', 'Festas']], t, 'oxtab')}</div>` + body +
     `<p class="muted nota">Segue a tradição mais comum na Umbanda. Saudações, dias, comidas e ervas mudam de casa para casa: os fundamentos do seu pai ou mãe de santo vêm primeiro.</p>`;
 },
 ajustes() {
@@ -373,7 +374,7 @@ ajustes() {
     `<div class="card stack"><h3 style="margin:0">Senha do app</h3><p style="margin:0" class="muted">${S.pinHash ? 'O app pede uma senha de 4 números ao abrir.' : 'Proteja o caixa e os dados dos filhos com uma senha de 4 números.'}</p>${S.pinHash ? '<div class="grid2"><button class="btn ghost" data-act="pin-set">Trocar senha</button><button class="btn danger" data-act="pin-off">Tirar senha</button></div>' : '<button class="btn" data-act="pin-set">Criar senha</button>'}</div>` +
     `<div class="card stack"><h3 style="margin:0">Cópia de segurança</h3><p style="margin:0" class="muted">Os dados ficam só neste celular. Salve uma cópia e guarde no Drive ou mande para você no WhatsApp. Use a mesma cópia para passar tudo para outro celular.</p><div class="grid2"><button class="btn" data-act="bk-export">Salvar cópia</button><label class="btn ghost" for="bkfile">Restaurar cópia</label></div><input id="bkfile" type="file" accept="application/json,.json" hidden></div>` +
     `<div class="card stack"><h3 style="margin:0">Recomeçar</h3>${S.demo ? '<button class="btn danger block" data-act="demo-ask">Apagar os dados de exemplo</button>' : '<button class="btn danger block" data-act="seed-ask">Apagar tudo e ver os exemplos</button>'}</div>` +
-    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.3</p>`;
+    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.4</p>`;
 }
 };
 const menuRow = (v, i, a, b) => `<button class="row" data-act="mais-go" data-v="${v}"><span class="av">${ic(i)}</span><span class="main"><strong>${a}</strong><small>${b}</small></span>${ic('right')}</button>`;
@@ -604,6 +605,22 @@ function lockScreen(mode) {
   };
 }
 
+/* ---------- vídeo ---------- */
+const VIDEO = 'video/orixas-e-linhas.mp4';
+function closeVid() { const v = $('#vidEl'); v.pause(); $('#vid').hidden = true; }
+async function shareVid() {
+  const link = new URL(VIDEO, location.href).href, text = `Orixás e Linhas de Umbanda · ${casaCurta()}`;
+  try {
+    if (navigator.canShare) {
+      toast('Preparando o vídeo…');
+      const blob = await (await fetch(VIDEO)).blob();
+      const file = new File([blob], 'orixas-e-linhas-tenda.mp4', { type: 'video/mp4' });
+      if (navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: text }); return; }
+    }
+  } catch (e) { if (e && e.name === 'AbortError') return; }
+  window.open('https://wa.me/?text=' + encodeURIComponent(text + '\n' + link), '_blank', 'noopener');
+}
+
 /* ---------- ações ---------- */
 const ACT = {
   close: () => closeSheet(),
@@ -652,6 +669,9 @@ const ACT = {
   'ponto-del': d => { S.pontos = S.pontos.filter(x => x.id !== d.id); save(); closeSheet(); render(true); toast('Ponto excluído'); },
   oxtab: d => { UI.oxTab = d.v; render(); },
   ficha: d => openFicha(d.tipo, d.k),
+  'vid-open': () => { const v = $('#vidEl'); if (!v.src) v.src = VIDEO; $('#vid').hidden = false; v.play().catch(() => {}); },
+  'vid-close': () => closeVid(),
+  'vid-share': () => shareVid(),
   'ficha-share': d => { const o = (d.tipo === 'l' ? AXE.LINHAS : AXE.ORIXAS).find(x => x.k === d.k); if (o) share(`*${o.n}* — ${o.s}\n\nDia: ${o.dia}\nCores: ${o.cor}${o.sinc ? '\nSincretismo: ' + o.sinc : ''}${o.festa ? '\nData festiva: ' + o.festa : ''}\n\n${o.reg}\n\nComidas e oferendas: ${o.comidas.join(', ')}\nErvas: ${o.ervas.join(', ')}\n\n${casaCurta()}`, o.n); },
   'del-ask': () => { $('#delask').hidden = true; $('#delbox').hidden = false; },
   'del-no': () => { $('#delbox').hidden = true; $('#delask').hidden = false; },
@@ -748,13 +768,14 @@ document.addEventListener('change', async e => {
   } catch (x) { toast('Esse arquivo não é uma cópia do app.'); }
   e.target.value = '';
 });
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('#telao').hidden) $('#telao').hidden = true; else if (sheetOpen()) closeSheet(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { if (!$('#vid').hidden) closeVid(); else if (!$('#telao').hidden) $('#telao').hidden = true; else if (sheetOpen()) closeSheet(); } });
 
 /* Botão voltar do Android: fecha a folha, volta ao menu ou ao início antes de sair */
 history.replaceState({ root: 1 }, '');
 history.pushState({ guard: 1 }, '');
 window.addEventListener('popstate', () => {
   const guard = () => history.pushState({ guard: 1 }, '');
+  if (!$('#vid').hidden) { closeVid(); guard(); return; }
   if (!$('#telao').hidden) { $('#telao').hidden = true; guard(); return; }
   if (sheetOpen()) { closeSheet(); guard(); return; }
   if (UI.tab === 'mais' && UI.sub !== 'menu') { UI.sub = 'menu'; render(); guard(); return; }
@@ -764,6 +785,7 @@ window.addEventListener('popstate', () => {
 
 /* ---------- início ---------- */
 $('[data-act="close"]').innerHTML = ic('x');
+$('[data-act="vid-close"]').innerHTML = ic('x');
 $('#hdrRiscado').outerHTML = RISCADO('riscado');
 applyTheme();
 render();
