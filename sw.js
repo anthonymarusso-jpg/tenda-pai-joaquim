@@ -1,5 +1,5 @@
 /* Guarda o app no celular para abrir sem internet. Troque VERSION a cada atualização. */
-const VERSION = 'tenda-v2.2.0';
+const VERSION = 'tenda-v2.3.0';
 const FILES = [
   './', 'index.html', 'app.css', 'app.js', 'orixas.js', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png', 'icons/logo-320.png',
@@ -7,7 +7,7 @@ const FILES = [
   'fonts/alegreya-sans-latin-400-normal.woff2', 'fonts/alegreya-sans-latin-500-normal.woff2',
   'fonts/alegreya-sans-latin-700-normal.woff2', 'fonts/alegreya-sans-latin-800-normal.woff2',
   'fonts/caveat-latin-600-normal.woff2', 'fonts/caveat-latin-700-normal.woff2',
-  'art/oxala.svg', 'art/iemanja.svg', 'art/oxum.svg', 'art/ogum.svg', 'art/oxossi.svg', 'art/xango.svg', 'art/iansa.svg', 'art/nana.svg', 'art/omulu.svg', 'art/ibeji.svg', 'art/caboclo.svg', 'art/pretovelho.svg', 'art/boiadeiro.svg', 'art/crianca.svg', 'art/baiano.svg', 'art/marinheiro.svg', 'art/cigano.svg', 'art/exu.svg', 'art/pombagira.svg', 'art/malandro.svg'
+  'img/oxala.jpg', 'img/iemanja.jpg', 'img/oxum.jpg', 'img/ogum.jpg', 'img/oxossi.jpg', 'img/xango.jpg', 'img/iansa.jpg', 'img/nana.jpg', 'img/omulu.jpg', 'img/ibeji.jpg', 'img/caboclo.jpg', 'img/pretovelho.jpg', 'img/boiadeiro.jpg', 'img/crianca.jpg', 'img/baiano.jpg', 'img/marinheiro.jpg', 'img/cigano.jpg', 'img/exu.jpg', 'img/pombagira.jpg', 'img/malandro.jpg'
 ];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(VERSION).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
