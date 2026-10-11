@@ -388,3 +388,23 @@ nav{flex:none;display:grid;grid-template-columns:repeat(5,1fr);background:var(--
   /* ficha do orixá */
   .ficha.anim{animation-name:aHero}
 }
+
+/* fundo da linha em cada gira da lista e no topo da gira aberta */
+.evrow.comfoto{position:relative;overflow:hidden;min-height:96px;background:radial-gradient(90% 120% at 100% 50%,color-mix(in srgb,var(--ac,#1a3a9c) 22%,transparent),transparent 70%),var(--surface)}
+.evrow .foto{position:absolute;top:0;right:0;bottom:0;height:100%;width:46%;object-fit:cover;object-position:50% 18%;pointer-events:none;-webkit-mask-image:linear-gradient(to right,transparent 0%,#000 65%);mask-image:linear-gradient(to right,transparent 0%,#000 65%)}
+.evrow.comfoto>*:not(.foto){position:relative}
+.evrow.comfoto .evm{padding-right:30%}
+.evrow.comfoto .cnt{background:color-mix(in srgb,var(--surface) 82%,transparent);border-radius:10px;padding:4px 8px;backdrop-filter:blur(3px)}
+.evrow.passada .foto{filter:grayscale(.65);opacity:.8}
+.evbanner{position:relative;overflow:hidden;border-radius:18px;min-height:170px;padding:16px;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;color:#fff;background:radial-gradient(120% 90% at 100% 0%,color-mix(in srgb,var(--ac,#1a3a9c) 40%,transparent),transparent 60%),linear-gradient(150deg,var(--night) 0%,var(--night2) 100%)}
+.evbanner .foto{position:absolute;top:0;right:0;bottom:0;height:100%;width:62%;object-fit:cover;object-position:50% 15%;-webkit-mask-image:linear-gradient(to right,transparent 0%,#000 55%);mask-image:linear-gradient(to right,transparent 0%,#000 55%)}
+.evbanner::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,color-mix(in srgb,var(--night) 75%,transparent),transparent 60%)}
+.evbanner>*:not(.foto){position:relative;z-index:1;text-shadow:0 1px 3px rgba(0,0,0,.6)}
+.evbanner .lbl{font-weight:800;font-size:12px;letter-spacing:.2em;text-transform:uppercase;opacity:.9}
+.evbanner strong{font-family:var(--f-display);font-weight:800;font-size:26px;line-height:1.1;max-width:75%}
+.evbanner .q{opacity:.95;font-weight:700}
+@media (prefers-reduced-motion:no-preference){
+  .evrow.anim .foto{animation:aFromR 1s cubic-bezier(.16,1,.3,1) both calc(var(--i,0) * 60ms + .1s)}
+  .evbanner.anim{animation-name:aHero}
+  .evbanner.anim .foto{animation:aKen 1.3s cubic-bezier(.16,1,.3,1) both}
+}

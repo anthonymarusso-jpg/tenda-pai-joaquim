@@ -394,7 +394,7 @@ ajustes() {
     `<div class="card stack"><h3 style="margin:0">Senha do app</h3><p style="margin:0" class="muted">${S.pinHash ? 'O app pede uma senha de 4 números ao abrir.' : 'Proteja o caixa e os dados dos filhos com uma senha de 4 números.'}</p>${S.pinHash ? '<div class="grid2"><button class="btn ghost" data-act="pin-set">Trocar senha</button><button class="btn danger" data-act="pin-off">Tirar senha</button></div>' : '<button class="btn" data-act="pin-set">Criar senha</button>'}</div>` +
     `<div class="card stack"><h3 style="margin:0">Cópia de segurança</h3><p style="margin:0" class="muted">Os dados ficam só neste celular. Salve uma cópia e guarde no Drive ou mande para você no WhatsApp. Use a mesma cópia para passar tudo para outro celular.</p><div class="grid2"><button class="btn" data-act="bk-export">Salvar cópia</button><label class="btn ghost" for="bkfile">Restaurar cópia</label></div><input id="bkfile" type="file" accept="application/json,.json" hidden></div>` +
     `<div class="card stack"><h3 style="margin:0">Recomeçar</h3>${S.demo ? '<button class="btn danger block" data-act="demo-ask">Apagar os dados de exemplo</button>' : '<button class="btn danger block" data-act="seed-ask">Apagar tudo e ver os exemplos</button>'}</div>` +
-    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.8</p>`;
+    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.9</p>`;
 }
 };
 const menuRow = (v, i, a, b) => `<button class="row" data-act="mais-go" data-v="${v}"><span class="av">${ic(i)}</span><span class="main"><strong>${a}</strong><small>${b}</small></span>${ic('right')}</button>`;
@@ -419,7 +419,8 @@ function filhosList() {
 }
 function evRow(e) {
   const d = parse(e.data), past = e.data < today(), cnt = (S.pres[e.id] || []).length, at = (S.fila[e.id] || []).length;
-  return `<button class="row" data-act="ev-open" data-id="${e.id}"><span class="dt"><b>${d.getDate()}</b><i>${MES_S[d.getMonth()]}</i></span><span class="evm"><strong>${esc(e.titulo)}</strong><small>${DIA_S[d.getDay()]} · ${esc(e.hora || '')}${past ? '' : ' · ' + esc(quando(e.data).toLowerCase())}</small>${linhaChip(e.linha)}</span>${past ? `<span class="cnt">${at || cnt}<small>${at ? 'atendidos' : 'presentes'}</small></span>` : ''}</button>`;
+  const gi = giraImg(e);
+  return `<button class="row evrow${gi ? ' comfoto' : ''}${past ? ' passada' : ''}" style="--ac:${(LINHAS[e.linha] || LINHAS.outros).cores[0]}" data-act="ev-open" data-id="${e.id}">${fotoBg(gi, 'foto')}<span class="dt"><b>${d.getDate()}</b><i>${MES_S[d.getMonth()]}</i></span><span class="evm"><strong>${esc(e.titulo)}</strong><small>${DIA_S[d.getDay()]} · ${esc(e.hora || '')}${past ? '' : ' · ' + esc(quando(e.data).toLowerCase())}</small>${linhaChip(e.linha)}</span>${past ? `<span class="cnt">${at || cnt}<small>${at ? 'atendidos' : 'presentes'}</small></span>` : ''}</button>`;
 }
 function txRow(t) {
   const inn = t.tipo === 'in';
@@ -656,7 +657,9 @@ function openEvent(id, keep) {
     ${fila.length ? `<div class="list">${fila.map(f => { const md = f.mid ? byId(S.members, f.mid) : null; return `<button class="row" data-act="fila-step" data-eid="${id}" data-id="${f.id}"><span class="sn ${f.status === 'feito' ? 'done' : f.status === 'agora' ? 'now' : ''}">${pad(f.senha)}</span><span class="main"><strong>${esc(f.nome)}</strong><small>${esc([md ? md.nome : '', f.obs].filter(Boolean).join(' · ') || 'Sem observação')}</small></span>${f.status === 'feito' ? '<em class="chip ok">Atendido</em>' : f.status === 'agora' ? '<em class="chip gold">Na vez</em>' : '<em class="chip mute">Aguardando</em>'}</button>`; }).join('')}</div>` : empty('Ninguém na fila', 'Dê senha aos consulentes conforme forem chegando.')}
     ${atual ? `<button class="btn ghost block" data-act="telao" data-eid="${id}">Mostrar senha em tela cheia</button>` : ''}`;
   const chamadaHtml = act.length ? `<p class="muted" style="margin:0">${pres.length} de ${act.length} presentes. Toque no nome para marcar.</p><div class="pres">${act.map(x => { const on = pres.includes(x.id); return `<button type="button" data-act="presence" data-eid="${id}" data-mid="${x.id}" aria-pressed="${on}"><span class="box">${on ? ic('check') : ''}</span><span><strong>${esc(x.nome)}</strong><br><small class="muted">${esc(x.cargo)}</small></span></button>`; }).join('')}</div>` : empty('Sem filhos ativos', 'Cadastre os filhos da casa primeiro.');
+  const gi = giraImg(e);
   sheet(e.titulo, `<div class="stack">
+    ${gi ? `<div class="evbanner" style="--ac:${(LINHAS[e.linha] || LINHAS.outros).cores[0]}">${fotoBg(gi, 'foto')}<span class="lbl">${esc(gNome(e.linha) === 'Outra linha' ? (LINHAS[e.linha] || LINHAS.outros).nome : gNome(e.linha))}</span><strong>${esc(e.titulo)}</strong><span class="q">${esc(fmtLong(e.data))} · ${esc(e.hora || '')}</span></div>` : ''}
     <dl class="kv card"><dt>Quando</dt><dd>${esc(fmtLong(e.data))} · ${esc(e.hora || '')}</dd><dt>Linha</dt><dd>${linhaChip(e.linha)}</dd><dt>Local</dt><dd>${esc(e.local || '—')}</dd>${e.obs ? `<dt>Recado</dt><dd>${esc(e.obs)}</dd>` : ''}</dl>
     <div class="grid2"><button class="btn wa" data-act="ev-share" data-id="${id}">${ic('share')}Avisar a casa</button><button class="btn ghost" data-act="ev-ics" data-id="${id}">${ic('cal')}Pôr na agenda</button></div>
     ${tabs}${UI.evTab === 'fila' ? filaHtml : chamadaHtml}
