@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Tenda Pai Joaquim</title>
+<meta name="description" content="App da Tenda de Umbanda Pai Joaquim de Angola e Manezinho Boiadeiro: filhos da casa, giras, atendimento, caixa e estoque.">
+<meta name="theme-color" content="#0d1f5c">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Tenda">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preload" href="fonts/alegreya-latin-800-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/alegreya-sans-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<div id="app">
+  <header class="hdr">
+    <svg id="hdrRiscado"></svg>
+    <img class="seal" src="icons/logo-320.png" alt="Brasão da Tenda" width="50" height="50">
+    <div class="who"><small>Tenda de Umbanda</small><b id="casaNome">Pai Joaquim de Angola e Manezinho Boiadeiro</b></div>
+  </header>
+  <div class="guia" aria-hidden="true"></div>
+  <main id="view" aria-live="polite"></main>
+  <nav id="nav" aria-label="Seções do app"></nav>
+  <div id="sheetWrap" hidden><div id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle"><div class="sh"><h2 id="sheetTitle"></h2><button type="button" class="iconbtn" data-act="close" aria-label="Fechar"></button></div><div id="sheetBody"></div></div></div>
+  <div id="telao" class="telao" hidden></div>
+  <div id="lock" class="lock" hidden></div>
+  <div id="toast" role="status" hidden></div>
+</div>
+<noscript>Ative o JavaScript para usar o app.</noscript>
+<script src="app.js"></script>
+</body>
+</html>
