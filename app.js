@@ -231,7 +231,7 @@ const casaCurta = () => S.casa.nome || 'Tenda de Umbanda';
 /* ---------- interface básica ---------- */
 let tt = null;
 function toast(msg) { const t = $('#toast'); t.textContent = msg; t.hidden = false; clearTimeout(tt); tt = setTimeout(() => { t.hidden = true; }, 2400); }
-function sheet(title, body) { $('#sheetTitle').textContent = title; $('#sheetBody').innerHTML = body; $('#sheetWrap').hidden = false; $('#sheet').scrollTop = 0; }
+function sheet(title, body) { $('#sheetTitle').textContent = title; $('#sheetBody').innerHTML = body; $('#sheetWrap').hidden = false; $('#sheet').scrollTop = 0; if (!$('#sheetBody form')) animar($('#sheetBody')); }
 function closeSheet() { $('#sheetWrap').hidden = true; $('#sheetBody').innerHTML = ''; }
 const sheetOpen = () => !$('#sheetWrap').hidden;
 const empty = (a, b) => `<div class="empty"><b>${esc(a)}</b>${esc(b)}</div>`;
@@ -256,6 +256,19 @@ function render(keep) {
   renderNav();
   $('#casaNome').textContent = casaCurta().replace(/^Tenda de Umbanda\s*/i, '') || casaCurta();
   v.scrollTop = keep ? st : 0;
+  if (!keep) animar(v);
+}
+/* Movimento de entrada: cada tipo de card tem o seu (CSS .anim), em cascata */
+const calmo = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+function animar(root) {
+  if (calmo()) return;
+  const box = '.list, .galeria, .grid2, .stack, .els';
+  let i = 0; const list = [];
+  root.querySelectorAll(':scope > *, :scope .list > *, :scope .galeria > *, :scope .grid2 > *, :scope .stack > *').forEach(el => {
+    if (el.matches(box) || el.matches('input, select, textarea, label, dl, p, small') && !el.matches('.card')) return;
+    el.style.setProperty('--i', Math.min(i++, 14)); el.classList.add('anim'); list.push(el);
+  });
+  setTimeout(() => list.forEach(el => el.classList.remove('anim')), 2800);
 }
 const videoCard = () => `<button class="videocard" data-act="vid-open"><span class="th"><img src="video/capa.jpg" alt="" width="76" height="135" loading="lazy"><span class="pl"></span></span><span class="tx"><small>Vídeo da casa</small><strong>Orixás e Linhas de Umbanda</strong><span>Todos os orixás e guias com saudação, dia e cores.</span></span></button>`;
 const demoBanner = () => S.demo ? '<div class="banner"><span>Estes são dados de exemplo. Apague quando for usar com a sua casa.</span><button class="btn" data-act="demo-ask">Limpar exemplos</button></div>' : '';
@@ -381,7 +394,7 @@ ajustes() {
     `<div class="card stack"><h3 style="margin:0">Senha do app</h3><p style="margin:0" class="muted">${S.pinHash ? 'O app pede uma senha de 4 números ao abrir.' : 'Proteja o caixa e os dados dos filhos com uma senha de 4 números.'}</p>${S.pinHash ? '<div class="grid2"><button class="btn ghost" data-act="pin-set">Trocar senha</button><button class="btn danger" data-act="pin-off">Tirar senha</button></div>' : '<button class="btn" data-act="pin-set">Criar senha</button>'}</div>` +
     `<div class="card stack"><h3 style="margin:0">Cópia de segurança</h3><p style="margin:0" class="muted">Os dados ficam só neste celular. Salve uma cópia e guarde no Drive ou mande para você no WhatsApp. Use a mesma cópia para passar tudo para outro celular.</p><div class="grid2"><button class="btn" data-act="bk-export">Salvar cópia</button><label class="btn ghost" for="bkfile">Restaurar cópia</label></div><input id="bkfile" type="file" accept="application/json,.json" hidden></div>` +
     `<div class="card stack"><h3 style="margin:0">Recomeçar</h3>${S.demo ? '<button class="btn danger block" data-act="demo-ask">Apagar os dados de exemplo</button>' : '<button class="btn danger block" data-act="seed-ask">Apagar tudo e ver os exemplos</button>'}</div>` +
-    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.7</p>`;
+    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.8</p>`;
 }
 };
 const menuRow = (v, i, a, b) => `<button class="row" data-act="mais-go" data-v="${v}"><span class="av">${ic(i)}</span><span class="main"><strong>${a}</strong><small>${b}</small></span>${ic('right')}</button>`;

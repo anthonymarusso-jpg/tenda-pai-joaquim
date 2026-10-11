@@ -338,3 +338,53 @@ nav{flex:none;display:grid;grid-template-columns:repeat(5,1fr);background:var(--
 .gview .main{display:flex;flex-direction:column}
 .gview strong{font-family:var(--f-display);font-weight:800;font-size:18px}
 .gview small{color:var(--muted);font-weight:700}
+
+/* ---------- movimento dos cards ao abrir ---------- */
+@media (prefers-reduced-motion:no-preference){
+  .anim{animation:aRise .62s cubic-bezier(.16,1,.3,1) both;animation-delay:calc(var(--i,0) * 60ms)}
+  @keyframes aRise{from{opacity:0;transform:translateY(22px)}to{opacity:1;transform:none}}
+  /* dia: entra da esquerda; a foto do orixá aproxima */
+  .dia.anim{animation-name:aLeft}
+  @keyframes aLeft{from{opacity:0;transform:translateX(-36px)}to{opacity:1;transform:none}}
+  .dia.anim .foto{animation:aKen 1.4s cubic-bezier(.16,1,.3,1) both .1s}
+  @keyframes aKen{from{opacity:0;transform:scale(1.25)}to{opacity:.95;transform:none}}
+  .dia.anim .saud{animation:aWrite .9s cubic-bezier(.16,1,.3,1) both .25s}
+  @keyframes aWrite{from{clip-path:inset(0 100% 0 0)}to{clip-path:inset(0 -10% 0 0)}}
+  /* próxima gira: cresce de leve e a imagem da linha desliza da direita */
+  .hero.anim{animation-name:aHero;animation-duration:.75s}
+  @keyframes aHero{from{opacity:0;transform:scale(.94) translateY(16px)}to{opacity:1;transform:none}}
+  .hero.anim .foto{animation:aFromR 1.1s cubic-bezier(.16,1,.3,1) both .15s}
+  @keyframes aFromR{from{opacity:0;transform:translateX(60px) scale(1.08)}to{opacity:.92;transform:none}}
+  .hero.anim strong{animation:aRise .7s cubic-bezier(.16,1,.3,1) both .3s}
+  /* vídeo: vira como uma carta; o play pulsa */
+  .videocard.anim{animation-name:aFlipX;transform-origin:50% 0}
+  @keyframes aFlipX{from{opacity:0;transform:perspective(800px) rotateX(-55deg) translateY(10px)}to{opacity:1;transform:none}}
+  .videocard .pl{animation:aPulse 2.4s ease-out infinite 1s}
+  @keyframes aPulse{0%{box-shadow:0 0 0 0 rgba(255,255,255,.6)}70%,100%{box-shadow:0 0 0 14px rgba(255,255,255,0)}}
+  /* números: estouram */
+  .stat.anim{animation-name:aPop;animation-timing-function:cubic-bezier(.34,1.56,.64,1)}
+  @keyframes aPop{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:none}}
+  /* listas: deslizam da direita */
+  .row.anim{animation-name:aRow}
+  @keyframes aRow{from{opacity:0;transform:translateX(40px)}to{opacity:1;transform:none}}
+  .row.anim .ava .mold{animation:aSpin .9s cubic-bezier(.16,1,.3,1) both calc(var(--i,0) * 60ms + .1s)}
+  /* galeria de orixás e linhas: giram em 3D */
+  .oxcard.anim{animation-name:aFlipY;animation-duration:.8s}
+  @keyframes aFlipY{from{opacity:0;transform:perspective(700px) rotateY(-75deg) translateY(16px)}to{opacity:1;transform:none}}
+  .oxcard.anim img{animation:aKen 1.2s cubic-bezier(.16,1,.3,1) both calc(var(--i,0) * 60ms)}
+  /* avisos: caem do alto */
+  .banner.anim,.card.notice.anim{animation-name:aDrop}
+  @keyframes aDrop{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:none}}
+  /* títulos: letras se juntam */
+  h2.anim,h3.anim,.vh.anim{animation-name:aType}
+  @keyframes aType{from{opacity:0;letter-spacing:.35em}to{opacity:1}}
+  /* perfil do médium: a moldura gira e o medalhão encaixa */
+  .perfil.anim .mold{animation:aSpin 1.1s cubic-bezier(.16,1,.3,1) both .1s}
+  @keyframes aSpin{from{opacity:0;transform:rotate(-120deg) scale(.8)}to{opacity:1;transform:none}}
+  .perfil.anim .ft{animation:aKen 1s cubic-bezier(.16,1,.3,1) both}
+  .perfil.anim .bdg,.row.anim .bdg{animation:aBadge .6s cubic-bezier(.34,1.56,.64,1) both .55s}
+  @keyframes aBadge{from{opacity:0;transform:scale(0) rotate(-40deg)}to{opacity:1;transform:none}}
+  .gview.anim .medm svg{animation:aSpin 1s cubic-bezier(.16,1,.3,1) both calc(var(--i,0) * 60ms + .1s)}
+  /* ficha do orixá */
+  .ficha.anim{animation-name:aHero}
+}
