@@ -351,7 +351,7 @@ pontos() {
 },
 orixas() {
   const fest = proximasFestas(FESTAS.length), t = UI.oxTab;
-  const card = (o, tipo) => `<button class="oxcard" data-act="ficha" data-tipo="${tipo}" data-k="${o.k}">${AXE.medalhao(o.k)}<strong>${esc(o.n)}</strong><span class="s">${esc(o.s)}</span><small>${esc(o.dia)}</small></button>`;
+  const card = (o, tipo) => `<button class="oxcard" data-act="ficha" data-tipo="${tipo}" data-k="${o.k}"><img class="estampa" src="art/${o.k}.svg" alt="" width="300" height="400" loading="lazy"><strong>${esc(o.n)}</strong><span class="s">${esc(o.s)}</span><small>${esc(o.dia)}</small></button>`;
   let body;
   if (t === 'linhas') body = `<div class="galeria">${AXE.LINHAS.map(o => card(o, 'l')).join('')}</div>`;
   else if (t === 'festas') body = `<div class="list">${fest.map(f => { const d = parse(f.d); return `<div class="row festa"><span class="dt"><b>${d.getDate()}</b><i>${MES_S[d.getMonth()]}</i></span><span class="main"><strong>${esc(f.quem)}</strong><small>${esc(f.nome)} · ${esc(quando(f.d).toLowerCase())}</small></span></div>`; }).join('')}</div>`;
@@ -373,7 +373,7 @@ ajustes() {
     `<div class="card stack"><h3 style="margin:0">Senha do app</h3><p style="margin:0" class="muted">${S.pinHash ? 'O app pede uma senha de 4 números ao abrir.' : 'Proteja o caixa e os dados dos filhos com uma senha de 4 números.'}</p>${S.pinHash ? '<div class="grid2"><button class="btn ghost" data-act="pin-set">Trocar senha</button><button class="btn danger" data-act="pin-off">Tirar senha</button></div>' : '<button class="btn" data-act="pin-set">Criar senha</button>'}</div>` +
     `<div class="card stack"><h3 style="margin:0">Cópia de segurança</h3><p style="margin:0" class="muted">Os dados ficam só neste celular. Salve uma cópia e guarde no Drive ou mande para você no WhatsApp. Use a mesma cópia para passar tudo para outro celular.</p><div class="grid2"><button class="btn" data-act="bk-export">Salvar cópia</button><label class="btn ghost" for="bkfile">Restaurar cópia</label></div><input id="bkfile" type="file" accept="application/json,.json" hidden></div>` +
     `<div class="card stack"><h3 style="margin:0">Recomeçar</h3>${S.demo ? '<button class="btn danger block" data-act="demo-ask">Apagar os dados de exemplo</button>' : '<button class="btn danger block" data-act="seed-ask">Apagar tudo e ver os exemplos</button>'}</div>` +
-    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.1</p>`;
+    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.2</p>`;
 }
 };
 const menuRow = (v, i, a, b) => `<button class="row" data-act="mais-go" data-v="${v}"><span class="av">${ic(i)}</span><span class="main"><strong>${a}</strong><small>${b}</small></span>${ic('right')}</button>`;
@@ -546,7 +546,7 @@ function openFicha(tipo, k) {
   if (o.sinc) linhas.push(['Sincretismo', o.sinc]);
   if (o.festa) linhas.push(['Data festiva', o.festa]);
   sheet(o.n, `<div class="ficha">
-    <div class="ficha-top">${AXE.medalhao(o.k, 220)}<span class="saud">${esc(o.s)}</span>${o.s2 ? `<span class="s2">${esc(o.s2)}</span>` : ''}</div>
+    <div class="ficha-top"><img class="estampa" src="art/${o.k}.svg" alt="Estampa de ${esc(o.n)}" width="300" height="400"><span class="saud">${esc(o.s)}</span>${o.s2 ? `<span class="s2">${esc(o.s2)}</span>` : ''}</div>
     <dl class="kv card">${linhas.map(([a, b]) => `<dt>${a}</dt><dd>${a === 'Cores' ? b : esc(b)}</dd>`).join('')}</dl>
     <section><h3>${tipo === 'l' ? 'Quem são' : 'Regência'}</h3><p>${esc(o.reg)}</p></section>
     <section><h3>${tipo === 'l' ? 'Oferendas' : 'Comidas e oferendas'}</h3>${lista(o.comidas, 'comida')}</section>

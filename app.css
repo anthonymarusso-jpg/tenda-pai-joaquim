@@ -265,3 +265,7 @@ nav{flex:none;display:grid;grid-template-columns:repeat(5,1fr);background:var(--
 .tags li{padding:6px 12px;border-radius:99px;font-size:15px;font-weight:500;background:var(--gold-soft);color:var(--fg);border:1px solid color-mix(in srgb,var(--gold) 30%,transparent)}
 .tags.erva li{background:var(--ok-bg);border-color:color-mix(in srgb,var(--ok) 30%,transparent)}
 .nota{margin:2px 2px 0;font-size:14.5px}
+
+.oxcard{padding:8px 8px 12px}
+.oxcard .estampa{width:100%;height:auto;aspect-ratio:3/4;border-radius:12px;margin-bottom:8px;display:block}
+.ficha-top .estampa{width:min(300px,78vw);height:auto;aspect-ratio:3/4;border-radius:18px;box-shadow:0 12px 28px rgba(8,18,70,.32)}

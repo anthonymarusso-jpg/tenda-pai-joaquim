@@ -200,5 +200,5 @@ const LINHAS = [
     ervas: ['Arruda', 'Guiné', 'Manjericão', 'Alecrim', 'Cravo'], ferr: 'Chapéu panamá, terno branco, gravata vermelha e bengala' }
 ];
 
-window.AXE = { ORIXAS, LINHAS, medalhao };
+window.AXE = { ORIXAS, LINHAS, medalhao, SYM: Y, SCENE: S, ART };
 })();
