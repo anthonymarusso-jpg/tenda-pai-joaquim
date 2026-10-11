@@ -1,0 +1,471 @@
+<!doctype html>
+<html lang="pt-BR" data-resolution="portrait">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=1080, height=1920" />
+<title>Orixás e Linhas · Tenda Pai Joaquim</title>
+<script src="assets/lib/gsap.min.js"></script>
+<script src="assets/lib/three.min.js"></script>
+<style>
+@font-face{font-family:'Alegreya';src:url(assets/fonts/alegreya-latin-800-normal.woff2) format('woff2');font-weight:800}
+@font-face{font-family:'Alegreya';src:url(assets/fonts/alegreya-latin-700-normal.woff2) format('woff2');font-weight:700}
+@font-face{font-family:'Alegreya Sans';src:url(assets/fonts/alegreya-sans-latin-800-normal.woff2) format('woff2');font-weight:800}
+@font-face{font-family:'Alegreya Sans';src:url(assets/fonts/alegreya-sans-latin-700-normal.woff2) format('woff2');font-weight:700}
+@font-face{font-family:'Alegreya Sans';src:url(assets/fonts/alegreya-sans-latin-500-normal.woff2) format('woff2');font-weight:500}
+@font-face{font-family:'Caveat';src:url(assets/fonts/caveat-latin-700-normal.woff2) format('woff2');font-weight:700}
+:root{--gold:#f7d77e;--gold2:#c9a24a;--night:#050a24;--navy:#0d1f5c;--white:#f6f3ea}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--night)}
+#root{position:relative;width:1080px;height:1920px;overflow:hidden;font-family:'Alegreya Sans',sans-serif;color:var(--white)}
+.clip{position:absolute;inset:0}
+.layer{position:absolute;inset:0;pointer-events:none}
+/* fundo */
+#bg{background:radial-gradient(120% 80% at 50% 30%,#13286e 0%,#081236 55%,#030616 100%)}
+.blob{position:absolute;border-radius:50%;filter:blur(120px);opacity:.55;will-change:transform}
+#blobA{width:900px;height:900px;left:-220px;top:180px;background:#1a3a9c}
+#blobB{width:800px;height:800px;left:420px;top:900px;background:#c9a24a;opacity:.28}
+#blobC{width:760px;height:760px;left:80px;top:-200px;background:#2b4bb8;opacity:.4}
+#three{position:absolute;inset:0;width:1080px;height:1920px}
+/* primeiro plano */
+.bokeh{position:absolute;border-radius:50%;background:radial-gradient(circle,rgba(255,236,180,.55) 0%,rgba(255,236,180,.18) 45%,rgba(255,236,180,0) 70%);filter:blur(6px)}
+#streak{position:absolute;left:-400px;top:0;width:260px;height:1920px;background:linear-gradient(90deg,rgba(255,240,200,0),rgba(255,240,200,.10),rgba(255,240,200,0));transform:skewX(-18deg);mix-blend-mode:screen}
+#vignette{background:radial-gradient(110% 75% at 46% 48%,rgba(0,0,0,0) 55%,rgba(0,0,0,.62) 100%)}
+#grain{opacity:.10;mix-blend-mode:overlay}
+/* tipografia */
+.word{display:inline-block;will-change:transform}
+.mask{display:inline-block;overflow:hidden;vertical-align:top;padding:0 .18em .14em .04em}
+.caps{font-family:'Alegreya Sans';font-weight:800;letter-spacing:.2em;text-transform:uppercase}
+.disp{font-family:'Alegreya';font-weight:800;line-height:1}
+.hand{font-family:'Caveat';font-weight:700;line-height:1}
+/* abertura */
+#logoWrap{position:absolute;left:190px;top:330px;width:560px;height:560px}
+#logoWrap img{position:absolute;inset:40px;width:480px;height:480px;border-radius:50%;box-shadow:0 0 0 6px #fff,0 0 80px 20px rgba(120,160,255,.35),0 40px 90px rgba(0,0,0,.6)}
+#logoRing{position:absolute;inset:0;overflow:visible}
+#logoSweep{position:absolute;inset:40px;border-radius:50%;overflow:hidden}
+#logoSweep i{position:absolute;top:-20%;left:-60%;width:40%;height:140%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.75),rgba(255,255,255,0));transform:skewX(-20deg)}
+#introTxt{position:absolute;left:90px;top:1000px;width:860px}
+#iSarava{font-size:200px;color:var(--gold);display:block;padding-right:.35em;text-shadow:0 0 40px rgba(247,215,126,.35)}
+#iTenda{font-size:50px;color:#c9d2f5;display:block;margin-top:18px}
+.iName{font-size:78px;display:block;margin-top:6px;color:#fff;white-space:nowrap}
+/* celular */
+.phoneScene{perspective:1700px;perspective-origin:470px 900px}
+.bigTitle{position:absolute;left:80px;top:250px;width:880px;color:#fff;font-size:210px;text-shadow:0 20px 60px rgba(0,0,0,.5)}
+.bigTitle.two{font-size:170px;line-height:.95}
+.phone{position:absolute;left:220px;top:560px;width:500px;height:1040px;border-radius:70px;background:linear-gradient(145deg,#2a2f45,#0b0d18 60%,#1f2333);padding:16px;box-shadow:0 60px 120px rgba(0,0,0,.65),inset 0 0 0 2px rgba(255,255,255,.18);transform-style:preserve-3d}
+.phone .scr{position:relative;width:468px;height:1008px;border-radius:56px;overflow:hidden;background:#f3f5fb}
+.phone .gloss{position:absolute;inset:16px;border-radius:56px;background:linear-gradient(115deg,rgba(255,255,255,0) 35%,rgba(255,255,255,.22) 45%,rgba(255,255,255,0) 55%);background-size:300% 100%;pointer-events:none}
+.app-h{height:150px;background:linear-gradient(160deg,#0d1f5c,#1a3a9c);display:flex;align-items:flex-end;gap:14px;padding:0 22px 18px}
+.app-h img{width:62px;height:62px;border-radius:50%;box-shadow:0 0 0 3px #fff}
+.app-h div{color:#fff;font-family:'Alegreya';font-weight:800;font-size:21px;line-height:1.1}
+.app-h small{display:block;font-family:'Alegreya Sans';font-weight:800;font-size:11px;letter-spacing:.2em;opacity:.8}
+.app-guia{height:14px;background-repeat:repeat-x;background-position:center;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='98' height='14'%3E%3Cpath d='M0 7H98' stroke='%23999' stroke-width='1'/%3E%3Cg stroke='%23000' stroke-opacity='.28' stroke-width='.8'%3E%3Ccircle cx='7' cy='7' r='5' fill='%23ffffff'/%3E%3Ccircle cx='21' cy='7' r='5' fill='%236fb6ea'/%3E%3Ccircle cx='35' cy='7' r='5' fill='%23f2c12e'/%3E%3Ccircle cx='49' cy='7' r='5' fill='%23c8302a'/%3E%3Ccircle cx='63' cy='7' r='5' fill='%232f8f46'/%3E%3Ccircle cx='77' cy='7' r='5' fill='%238a5a2b'/%3E%3Ccircle cx='91' cy='7' r='5' fill='%239a7bc8'/%3E%3C/g%3E%3C/svg%3E")}
+.app-t{font-family:'Alegreya';font-weight:800;font-size:30px;color:#0f1a45;padding:18px 22px 10px}
+.tabs{position:relative;margin:0 22px;height:52px;border-radius:14px;background:#e3e9f8;display:grid;grid-template-columns:repeat(3,1fr);font-weight:800;font-size:18px;color:#56608a}
+.tabs span{position:relative;z-index:2;display:flex;align-items:center;justify-content:center}
+.tabs span.on{color:#1a3a9c}
+.pill{position:absolute;z-index:1;top:4px;left:4px;width:calc((100% - 8px)/3);height:44px;border-radius:11px;background:#fff;box-shadow:0 2px 6px rgba(10,20,70,.18)}
+.grid{position:absolute;left:22px;right:22px;top:362px;display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.mc{background:#fff;border:1px solid #d3daee;border-radius:18px;padding:8px 8px 12px;text-align:center;color:#0f1a45}
+.mc img{width:100%;aspect-ratio:2/3;object-fit:cover;border-radius:12px;border:2px solid #c9a24a;display:block}
+.mc b{display:block;font-family:'Alegreya';font-weight:800;font-size:20px;margin-top:6px}
+.mc i{display:block;font-family:'Caveat';font-weight:700;font-style:normal;font-size:22px;color:#1a3a9c}
+/* desfile */
+.paradeScene{perspective:1500px;perspective-origin:470px 760px}
+.item{position:absolute;inset:0;visibility:hidden}
+.card{position:absolute;left:150px;top:255px;width:640px;height:960px;transform-style:preserve-3d;will-change:transform}
+.frame{position:absolute;inset:-16px;border-radius:46px;background:linear-gradient(150deg,rgba(255,255,255,.28),rgba(255,255,255,.05) 40%,rgba(255,255,255,.14));box-shadow:0 50px 110px rgba(0,0,0,.6),inset 0 0 0 1.5px rgba(255,255,255,.35)}
+.photo{position:absolute;inset:0;border-radius:32px;overflow:hidden;border:4px solid var(--gold2)}
+.photo img{width:100%;height:100%;object-fit:cover;display:block}
+.sheen{position:absolute;top:-10%;left:-70%;width:45%;height:120%;background:linear-gradient(90deg,rgba(255,255,255,0),rgba(255,255,255,.45),rgba(255,255,255,0));transform:skewX(-18deg);mix-blend-mode:screen}
+.txt{position:absolute;left:40px;width:860px;top:1250px;text-align:center}
+.nm{font-size:140px;color:#fff;white-space:nowrap;text-shadow:0 12px 40px rgba(0,0,0,.55)}
+.sd{display:block;font-size:100px;color:var(--gold);margin-top:0;text-shadow:0 0 30px rgba(247,215,126,.3)}
+.sdw{display:inline-block;padding:0 .2em .1em .1em}
+.dl{display:flex;justify-content:center;align-items:center;gap:16px;margin-top:10px;font-size:48px;font-weight:700;color:#d8def7}
+.ct{width:30px;height:30px;border-radius:50%;box-shadow:inset -4px -4px 6px rgba(0,0,0,.3),0 0 0 2px rgba(255,255,255,.25)}
+.groupTag{position:absolute;left:90px;top:262px;font-size:40px;letter-spacing:.22em}
+/* final */
+.outroScene{perspective:1400px;perspective-origin:470px 700px}
+#ring{position:absolute;left:470px;top:700px;width:0;height:0;transform-style:preserve-3d}
+.rp{position:absolute;left:0;top:0;width:0;height:0;transform-style:preserve-3d}
+.rc{position:absolute;left:-90px;top:-135px;width:180px;height:270px;border-radius:16px;overflow:hidden;border:3px solid var(--gold2);box-shadow:0 20px 40px rgba(0,0,0,.5);backface-visibility:visible}
+.rc img{width:100%;height:100%;object-fit:cover;display:block}
+#oLogo{position:absolute;left:470px;top:700px;width:360px;height:360px;margin:-180px 0 0 -180px;border-radius:50%;box-shadow:0 0 0 5px #fff,0 0 120px 40px rgba(247,215,126,.35)}
+#oFlash{position:absolute;left:470px;top:700px;width:900px;height:900px;margin:-450px 0 0 -450px;border-radius:50%;background:radial-gradient(circle,rgba(255,244,210,.95),rgba(255,230,160,.35) 35%,rgba(255,230,160,0) 70%);opacity:0;mix-blend-mode:screen}
+#outroTxt{position:absolute;left:90px;top:1110px;width:860px;text-align:center}
+#oSarava{font-size:210px;color:var(--gold);display:block;padding:0 .35em;text-shadow:0 0 50px rgba(247,215,126,.4)}
+#oTenda{font-size:50px;color:#c9d2f5;display:block;margin-top:16px}
+.oName{font-size:78px;display:block;margin-top:4px;color:#fff;white-space:nowrap}
+</style>
+</head>
+<body>
+<div id="root" data-composition-id="main" data-start="0" data-duration="46" data-width="1080" data-height="1920" data-fps="60">
+
+  <!-- camadas fixas: fundo, 3D, primeiro plano -->
+  <div id="bg" class="clip layer" data-start="0" data-duration="46" data-track-index="0">
+    <div class="blob" id="blobC"></div><div class="blob" id="blobA"></div><div class="blob" id="blobB"></div>
+  </div>
+  <canvas id="three" class="clip" width="1080" height="1920" data-start="0" data-duration="46" data-track-index="1"></canvas>
+
+  <!-- abertura -->
+  <div id="sIntro" class="clip" data-start="0" data-duration="5.2" data-track-index="2">
+    <div id="logoWrap">
+      <svg id="logoRing" viewBox="0 0 560 560"><circle id="ringPath" cx="280" cy="280" r="262" fill="none" stroke="#f7d77e" stroke-width="3" opacity=".9"/><g id="ringBeads"></g></svg>
+      <img src="assets/img/logo.png" alt="">
+      <div id="logoSweep"><i></i></div>
+    </div>
+    <div id="introTxt">
+      <span class="mask"><span id="iSarava" class="hand word">Saravá!</span></span>
+      <span id="iTenda" class="caps"></span>
+      <span class="iName disp" id="iName1"></span>
+      <span class="iName disp" id="iName2"></span>
+    </div>
+  </div>
+
+  <!-- celular: aba Orixás -->
+  <div id="sPhoneA" class="clip phoneScene" data-start="4.4" data-duration="4.2" data-track-index="3">
+    <div class="bigTitle disp" id="tOrixas"></div>
+    <div class="phone" id="phoneA"><div class="scr" id="scrA"></div><div class="gloss"></div></div>
+  </div>
+
+  <!-- desfile dos orixás -->
+  <div id="sParadeA" class="clip paradeScene" data-start="7.6" data-duration="15.8" data-track-index="4"></div>
+
+  <!-- celular: aba Linhas -->
+  <div id="sPhoneB" class="clip phoneScene" data-start="22.8" data-duration="4.3" data-track-index="5">
+    <div class="bigTitle disp two" id="tLinhas"></div>
+    <div class="phone" id="phoneB"><div class="scr" id="scrB"></div><div class="gloss"></div></div>
+  </div>
+
+  <!-- desfile das linhas -->
+  <div id="sParadeB" class="clip paradeScene" data-start="26.1" data-duration="15.9" data-track-index="6"></div>
+
+  <!-- final -->
+  <div id="sOutro" class="clip outroScene" data-start="41.3" data-duration="4.7" data-track-index="7">
+    <div id="oFlash"></div>
+    <div id="ring"></div>
+    <img id="oLogo" src="assets/img/logo.png" alt="">
+    <div id="outroTxt">
+      <span class="mask"><span id="oSarava" class="hand word">Saravá!</span></span>
+      <span id="oTenda" class="caps"></span>
+      <span class="oName disp" id="oName1"></span>
+      <span class="oName disp" id="oName2"></span>
+    </div>
+  </div>
+
+  <div id="fg" class="clip layer" data-start="0" data-duration="46" data-track-index="8"><div id="streak"></div></div>
+  <svg id="grain" class="clip layer" width="1080" height="1920" data-start="0" data-duration="46" data-track-index="9">
+    <filter id="noise"><feTurbulence id="turb" type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="1" stitchTiles="stitch"/><feColorMatrix type="saturate" values="0"/></filter>
+    <rect width="1080" height="1920" filter="url(#noise)"/>
+  </svg>
+  <div id="vignette" class="clip layer" data-start="0" data-duration="46" data-track-index="10"></div>
+
+  <svg width="0" height="0" style="position:absolute">
+    <filter id="mbA" x="-30%" y="-10%" width="160%" height="120%"><feGaussianBlur id="mbAblur" stdDeviation="0 0"/></filter>
+    <filter id="mbB" x="-30%" y="-10%" width="160%" height="120%"><feGaussianBlur id="mbBblur" stdDeviation="0 0"/></filter>
+    <filter id="mbZ" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur id="mbZblur" stdDeviation="0"/></filter>
+  </svg>
+</div>
+
+<script>
+(function(){
+const D = 46;
+const ORX = [
+  {k:'oxala', n:'Oxalá', s:'Epa Babá!', dia:'Sexta-feira', cores:['#ffffff'], ac:'#e8e2d0'},
+  {k:'iemanja', n:'Iemanjá', s:'Odoyá!', dia:'Sábado', cores:['#6fb6ea','#ffffff'], ac:'#4f9be0'},
+  {k:'oxum', n:'Oxum', s:'Ora yê yê ô!', dia:'Sábado', cores:['#f2c12e','#d4a017'], ac:'#e0a91e'},
+  {k:'ogum', n:'Ogum', s:'Ogunhê!', dia:'Terça-feira', cores:['#c8302a','#1f3f8f'], ac:'#c8302a'},
+  {k:'oxossi', n:'Oxóssi', s:'Okê Arô!', dia:'Quinta-feira', cores:['#2f8f46','#7fd1ff'], ac:'#2f8f46'},
+  {k:'xango', n:'Xangô', s:'Kaô Kabecilê!', dia:'Quarta-feira', cores:['#8a5a2b','#ffffff','#c8302a'], ac:'#a8682d'},
+  {k:'iansa', n:'Iansã', s:'Eparrey, Oyá!', dia:'Quarta-feira', cores:['#f2c12e','#e0603a'], ac:'#e0603a'},
+  {k:'nana', n:'Nanã', s:'Saluba, Nanã!', dia:'Sábado', cores:['#9a7bc8','#ffffff'], ac:'#8a6ab8'},
+  {k:'omulu', n:'Omulu', s:'Atotô!', dia:'Segunda-feira', cores:['#111111','#ffffff','#c8302a'], ac:'#b8933f'},
+  {k:'ibeji', n:'Ibeji', s:'Oni Beijada!', dia:'Domingo', cores:['#f08cbc','#6fb6ea'], ac:'#e070a8'}
+];
+const GUI = [
+  {k:'caboclo', n:'Caboclos', s:'Okê, Caboclo!', dia:'Quinta-feira', cores:['#2f8f46','#ffffff'], ac:'#2f8f46'},
+  {k:'pretovelho', n:'Pretos-Velhos', s:'Adorei as Almas!', dia:'Segunda-feira', cores:['#111111','#ffffff'], ac:'#c9b88f'},
+  {k:'boiadeiro', n:'Boiadeiros', s:'Getruá, Boiadeiro!', dia:'Quinta-feira', cores:['#8a5a2b','#e9c46a'], ac:'#a0703a'},
+  {k:'crianca', n:'Crianças', s:'Oni Beijada!', dia:'Domingo', cores:['#f08cbc','#6fb6ea'], ac:'#e070a8'},
+  {k:'baiano', n:'Baianos', s:'Salve a Bahia!', dia:'Amarelo e branco', cores:['#f2c12e','#ffffff'], ac:'#e0a91e'},
+  {k:'marinheiro', n:'Marinheiros', s:'Salve a Marujada!', dia:'Sábado', cores:['#1f63a8','#ffffff'], ac:'#3a7fc8'},
+  {k:'cigano', n:'Ciganos', s:'Optchá!', dia:'Dourado e vermelho', cores:['#7b3fa0','#f2c12e','#c8302a'], ac:'#8e4cb8'},
+  {k:'exu', n:'Exus', s:'Laroyê, Exu!', dia:'Segunda-feira', cores:['#c8302a','#111111'], ac:'#c8302a'},
+  {k:'pombagira', n:'Pombagiras', s:'Laroyê, Pombagira!', dia:'Segunda-feira', cores:['#c8302a','#111111'], ac:'#b3132a'},
+  {k:'malandro', n:'Malandros', s:'Salve a Malandragem!', dia:'Branco e vermelho', cores:['#ffffff','#c8302a'], ac:'#d9d2bd'}
+];
+const STEP = 1.5, PA = 8.0, PB = 26.5;
+const $ = s => document.querySelector(s);
+const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+const words = (txt, cls) => txt.split(' ').map(w => `<span class="mask"><span class="word ${cls || ''}">${w}</span></span>`).join(' ');
+
+/* ---------- montagem do DOM ---------- */
+// contas do anel do brasão
+const beadCols = ['#ffffff','#6fb6ea','#f2c12e','#c8302a','#2f8f46','#8a5a2b','#9a7bc8'];
+let beads = '';
+for (let i = 0; i < 42; i++) { const a = i / 42 * Math.PI * 2 - Math.PI / 2; beads += `<circle class="bd" cx="${(280 + Math.cos(a) * 262).toFixed(1)}" cy="${(280 + Math.sin(a) * 262).toFixed(1)}" r="11" fill="${beadCols[i % 7]}" stroke="rgba(0,0,0,.35)" stroke-width="1.5"/>`; }
+$('#ringBeads').innerHTML = beads;
+$('#iTenda').innerHTML = words('Tenda de Umbanda');
+$('#iName1').innerHTML = words('Pai Joaquim de Angola');
+$('#iName2').innerHTML = words('e Manezinho Boiadeiro');
+$('#oTenda').innerHTML = words('Tenda de Umbanda');
+$('#oName1').innerHTML = words('Pai Joaquim de Angola');
+$('#oName2').innerHTML = words('e Manezinho Boiadeiro');
+$('#tOrixas').innerHTML = words('Orixás');
+$('#tLinhas').innerHTML = words('Linhas de') + '<br>' + words('Umbanda');
+
+function screen(scr, list, tabIdx) {
+  scr.innerHTML = `<div class="app-h"><img src="assets/img/logo.png" alt=""><div><small>TENDA DE UMBANDA</small>Pai Joaquim de Angola e Manezinho Boiadeiro</div></div><div class="app-guia"></div>
+  <div class="app-t">Orixás e linhas</div>
+  <div class="tabs"><i class="pill"></i><span class="${tabIdx === 0 ? 'on' : ''}">Orixás</span><span class="${tabIdx === 1 ? 'on' : ''}">Linhas</span><span>Festas</span></div>
+  <div class="grid">${list.slice(0, 4).map(o => `<div class="mc"><img src="assets/img/${o.k}.jpg" alt=""><b>${o.n}</b><i>${o.s}</i></div>`).join('')}</div>`;
+}
+screen($('#scrA'), ORX, 0);
+screen($('#scrB'), GUI, 1);
+
+function parade(host, list, gid) {
+  list.forEach((o, i) => {
+    const it = el('div', 'item'); it.id = `${gid}${i}`;
+    it.innerHTML = `<div class="card"><div class="frame"></div><div class="photo"><img src="assets/img/${o.k}.jpg" alt=""><i class="sheen"></i></div></div>
+      <div class="txt"><div class="nm disp">${words(o.n)}</div><span class="sd hand"><span class="sdw">${o.s}</span></span>
+      <div class="dl"><span class="dtx">${o.dia}</span>${o.cores.map(c => `<i class="ct" style="background:${c}"></i>`).join('')}</div></div>`;
+    host.appendChild(it);
+  });
+}
+// um filtro de desfoque direcional por cartão
+const defs = document.querySelector('#mbA').parentNode;
+function addBlur(id){ const ns='http://www.w3.org/2000/svg'; const f=document.createElementNS(ns,'filter'); f.setAttribute('id',id); f.setAttribute('x','-30%'); f.setAttribute('y','-10%'); f.setAttribute('width','160%'); f.setAttribute('height','120%'); const g=document.createElementNS(ns,'feGaussianBlur'); g.setAttribute('id',id+'b'); g.setAttribute('stdDeviation','0 0'); f.appendChild(g); defs.appendChild(f); }
+for (let i = 0; i < 10; i++) { addBlur('mba' + i); addBlur('mbb' + i); }
+parade($('#sParadeA'), ORX, 'a');
+parade($('#sParadeB'), GUI, 'b');
+
+const ALL = ORX.concat(GUI);
+ALL.forEach((o, i) => { const pv = el('div', 'rp'); pv.style.transform = `rotateY(${i * 18}deg)`; const c = el('div', 'rc', `<img src="assets/img/${o.k}.jpg" alt="">`); pv.appendChild(c); $('#ring').appendChild(pv); });
+
+// bokeh do primeiro plano (posições fixas, sem aleatório)
+const BOK = [[120,420,90],[880,300,60],[760,1500,120],[60,1300,70],[930,980,50],[300,1720,80],[620,180,40],[980,1700,100],[420,1000,36],[180,820,44]];
+BOK.forEach(([x, y, r], i) => { const b = el('div', 'bokeh'); b.style.cssText = `left:${x}px;top:${y}px;width:${r * 2}px;height:${r * 2}px`; b.id = 'bk' + i; $('#fg').appendChild(b); });
+
+// ajusta nomes longos para caber em 860 px, mínimo 120 px
+function fitNames() {
+  document.querySelectorAll('.nm').forEach(n => { let fs = 140; n.style.fontSize = fs + 'px'; while (n.scrollWidth > 860 && fs > 120) { fs -= 4; n.style.fontSize = fs + 'px'; } });
+  document.querySelectorAll('.sd').forEach(n => { let fs = 100; n.style.fontSize = fs + 'px'; while (n.scrollWidth > 880 && fs > 72) { fs -= 4; n.style.fontSize = fs + 'px'; } });
+}
+fitNames();
+if (document.fonts) { document.fonts.ready.then(fitNames); }
+window.addEventListener('hf-after-fonts-modules', fitNames);
+
+/* ---------- timeline GSAP ---------- */
+const tl = gsap.timeline({ paused: true, defaults: { ease: 'expo.out' } });
+tl.set({}, {}, D);
+
+// fundo vivo: blobs derivando o tempo todo
+tl.fromTo('#blobA', { x: -60, y: 0 }, { x: 140, y: 220, duration: D, ease: 'sine.inOut' }, 0);
+tl.fromTo('#blobB', { x: 40, y: 0 }, { x: -180, y: -260, duration: D, ease: 'sine.inOut' }, 0);
+tl.fromTo('#blobC', { x: 0, y: 0, scale: 1 }, { x: 160, y: 120, scale: 1.25, duration: D, ease: 'sine.inOut' }, 0);
+BOK.forEach((b, i) => tl.fromTo('#bk' + i, { x: 0, y: 0 }, { x: (i % 2 ? -1 : 1) * (60 + i * 9), y: -140 - i * 22, duration: D, ease: 'none' }, 0));
+[1.4, 9.2, 17.0, 24.6, 33.1, 43.4].forEach(t0 => tl.fromTo('#streak', { x: 0, opacity: 0 }, { x: 1700, opacity: 1, duration: 1.6, ease: 'power2.inOut' }, t0));
+
+// cor do fundo acompanha cada orixá / linha
+function tint(color, t0, dur) { tl.to('#blobA', { backgroundColor: color, duration: dur || .8, ease: 'power2.out' }, t0); tl.to('#blobB', { backgroundColor: color, duration: (dur || .8) + .2, ease: 'power2.out' }, t0 + .1); }
+
+/* 1. abertura */
+tl.fromTo('#logoWrap', { scale: .25, opacity: 0, rotation: -40, filter: 'blur(30px)' }, { scale: 1, opacity: 1, rotation: 0, filter: 'blur(0px)', duration: 1.1 }, .35);
+tl.fromTo('#logoWrap', { y: 20 }, { y: -20, duration: 3.6, ease: 'sine.inOut', immediateRender: false }, .6);
+const ringLen = 2 * Math.PI * 262;
+tl.fromTo('#ringPath', { attr: { 'stroke-dasharray': ringLen, 'stroke-dashoffset': ringLen } }, { attr: { 'stroke-dashoffset': 0 }, duration: 1.1, ease: 'power4.out' }, .95);
+tl.fromTo('.bd', { scale: 0, transformOrigin: '50% 50%' }, { scale: 1, duration: .5, stagger: .018, ease: 'back.out(2.2)' }, 1.05);
+tl.fromTo('#logoSweep i', { x: 0 }, { x: 900, duration: 1.0, ease: 'power3.inOut' }, 1.5);
+tl.fromTo('#iSarava', { yPercent: 110 }, { yPercent: 0, duration: .9 }, 1.8);
+tl.fromTo('#iSarava', { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 -15% 0 0)', duration: .8, ease: 'power4.out', immediateRender: false }, 1.8);
+tl.fromTo('#iTenda .word', { yPercent: 120 }, { yPercent: 0, duration: .6, stagger: .09 }, 2.5);
+tl.fromTo('#iName1 .word', { yPercent: 120, rotation: 6 }, { yPercent: 0, rotation: 0, duration: .7, stagger: .1 }, 3.05);
+tl.fromTo('#iName2 .word', { yPercent: 120, rotation: 6 }, { yPercent: 0, rotation: 0, duration: .7, stagger: .1 }, 3.6);
+// zoom através do brasão
+tl.to('#introTxt', { y: -120, opacity: 0, duration: .6, ease: 'power4.in' }, 4.15);
+tl.to('#logoWrap', { scale: 7, opacity: 0, filter: 'blur(24px)', duration: .9, ease: 'power4.inOut' }, 4.25);
+
+/* 2. celular aba Orixás */
+function phoneIn(scene, phone, title, t0, tabFrom, tabTo, gridSel) {
+  tl.fromTo(title + ' .word', { yPercent: 120 }, { yPercent: 0, duration: .8, stagger: .1 }, t0 + .25);
+  tl.fromTo(title, { x: -40 }, { x: 40, duration: 3.6, ease: 'sine.inOut' }, t0);
+  tl.fromTo(phone, { z: -1400, rotationY: 48, rotationX: 14, opacity: 0, filter: 'blur(18px)' }, { z: 0, rotationY: -16, rotationX: 7, opacity: 1, filter: 'blur(0px)', duration: 1.1 }, t0);
+  tl.to(phone, { rotationY: -6, rotationX: 4, y: -20, duration: 2.2, ease: 'sine.inOut' }, t0 + 1.1);
+  tl.fromTo(phone + ' .gloss', { backgroundPosition: '100% 0' }, { backgroundPosition: '0% 0', duration: 2.6, ease: 'power2.inOut' }, t0 + .4);
+  tl.fromTo(phone + ' .pill', { xPercent: tabFrom * 100 }, { xPercent: tabTo * 100, duration: .7, ease: 'power4.out' }, t0 + 1.0);
+  tl.fromTo(phone + ' .mc img', { scale: 1.12 }, { scale: 1, duration: 2.4, ease: 'sine.out' }, t0 + .15);
+  tl.fromTo(phone + ' .mc', { scale: .55, opacity: 0, y: 40 }, { scale: 1, opacity: 1, y: 0, duration: .55, stagger: .1, ease: 'expo.out' }, t0 + .15);
+  // toque no primeiro cartão (único elemento com mola: é o item "clicado")
+  tl.to(phone + ' .mc:first-child', { scale: .9, duration: .14, ease: 'power2.in', immediateRender: false }, t0 + 2.25);
+  tl.to(phone + ' .mc:first-child', { scale: 1.06, duration: .45, ease: 'back.out(3)', immediateRender: false }, t0 + 2.39);
+}
+phoneIn('#sPhoneA', '#phoneA', '#tOrixas', 4.6, 2, 0);
+// mergulho no primeiro cartão (Oxalá) — match cut
+tl.to('#tOrixas', { opacity: 0, y: -80, duration: .6, ease: 'power4.in' }, 7.2);
+tl.to('#phoneA', { rotationY: 0, rotationX: 0, scale: 3.4, x: 374, y: -474, z: 0, duration: 1.0, ease: 'power4.inOut' }, 7.25);
+tl.to('#phoneA', { opacity: 0, filter: 'blur(10px)', duration: .35, ease: 'power2.in' }, 7.9);
+
+/* 3. desfile */
+function runParade(gid, list, base, firstFromPhone) {
+  list.forEach((o, i) => {
+    const t0 = base + i * STEP, it = `#${gid}${i}`, card = `${it} .card`, blurId = `#mb${gid}${i}b`, blurF = `url(#mb${gid}${i})`;
+    tl.set(it, { visibility: 'visible' }, t0 - .2);
+    tl.set(card, { filter: blurF }, t0 - .2);
+    tint(o.ac, t0 - .15);
+    // entrada: vem da profundidade
+    if (i === 0 && firstFromPhone) {
+      tl.fromTo(card, { scale: 1.25, rotationY: 0, x: 0, z: 0, opacity: 0 }, { scale: 1, rotationY: -6, opacity: 1, duration: .7, ease: 'power4.out' }, t0 - .2);
+    } else {
+      tl.fromTo(card, { scale: .5, rotationY: 38, x: 380, z: -500, opacity: 0 }, { scale: 1, rotationY: -6, x: 0, z: 0, opacity: 1, duration: .62 }, t0 - .2);
+      tl.fromTo(blurId, { attr: { stdDeviation: '34 0' } }, { attr: { stdDeviation: '0 0' }, duration: .45, ease: 'power3.out' }, t0 - .2);
+    }
+    // respiração enquanto fica
+    tl.fromTo(card, { y: 12 }, { y: -12, duration: 1.3, ease: 'sine.inOut' }, t0 - .1);
+    tl.to(card, { rotationY: 5, duration: 1.0, ease: 'sine.inOut' }, t0 + .35);
+    tl.fromTo(`${it} .sheen`, { x: 0 }, { x: 1300, duration: .7, ease: 'power3.inOut' }, t0 + .25);
+    // textos
+    tl.fromTo(`${it} .nm .word`, { yPercent: 115, scale: 1.15 }, { yPercent: 0, scale: 1, duration: .6, stagger: .07 }, t0 + .05);
+    tl.fromTo(`${it} .sdw`, { clipPath: 'inset(0 100% 0 0)', x: -20 }, { clipPath: 'inset(0 -15% 0 0)', x: 0, duration: .55, ease: 'power4.out' }, t0 + .35);
+    tl.fromTo(`${it} .dl`, { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: .45 }, t0 + .6);
+    tl.fromTo(`${it} .ct`, { scale: 0 }, { scale: 1, duration: .45, stagger: .06, ease: 'back.out(2.5)' }, t0 + .65);
+    // saída (menos no último, que é tratado pela troca de cena)
+    if (i < list.length - 1) {
+      tl.to(card, { x: -760, z: 420, rotationY: -40, opacity: 0, duration: .5, ease: 'power4.in' }, t0 + 1.15);
+      tl.to(blurId, { attr: { stdDeviation: '40 0' }, duration: .5, ease: 'power4.in' }, t0 + 1.15);
+      tl.to(`${it} .txt`, { y: -60, opacity: 0, duration: .35, ease: 'power4.in' }, t0 + 1.2);
+      tl.set(it, { visibility: 'hidden' }, t0 + 1.7);
+    }
+  });
+}
+runParade('a', ORX, PA, true);
+runParade('b', GUI, PB, true);
+
+/* 4. troca para a aba Linhas: último orixá volta para o celular */
+const lastA = '#a9', tB = 22.95;
+tl.to(`${lastA} .txt`, { y: -60, opacity: 0, duration: .4, ease: 'power4.in' }, tB);
+tl.to(`${lastA} .card`, { scale: .3, x: -60, y: 250, z: -300, rotationY: -14, opacity: 0, duration: .9, ease: 'power4.inOut' }, tB);
+tl.set(lastA, { visibility: 'hidden' }, tB + 1);
+tint('#1a3a9c', tB + .2, 1.2);
+phoneIn('#sPhoneB', '#phoneB', '#tLinhas', 23.2, 0, 1);
+tl.to('#tLinhas', { opacity: 0, y: -80, duration: .6, ease: 'power4.in' }, 25.7);
+tl.to('#phoneB', { rotationY: 0, rotationX: 0, scale: 3.4, x: 374, y: -474, z: 0, duration: 1.0, ease: 'power4.inOut' }, 25.75);
+tl.to('#phoneB', { opacity: 0, filter: 'blur(10px)', duration: .35, ease: 'power2.in' }, 26.4);
+
+/* 5. final */
+const lastB = '#b9', tO = 41.45;
+tl.to(`${lastB} .txt`, { y: -60, opacity: 0, duration: .4, ease: 'power4.in' }, tO);
+tl.to(`${lastB} .card`, { scale: .2, y: -60, z: -400, opacity: 0, duration: .8, ease: 'power4.inOut' }, tO);
+tl.set(lastB, { visibility: 'hidden' }, tO + .9);
+tint('#1a3a9c', tO, 1.2);
+tl.fromTo('#oLogo', { scale: 0, opacity: 0, rotation: -90 }, { scale: 1, opacity: 1, rotation: 0, duration: .8, ease: 'expo.out' }, tO + .25);
+document.querySelectorAll('.rc').forEach((c, i) => {
+  tl.fromTo(c, { z: 0, scale: 0, opacity: 0, transformOrigin: '50% 50%' }, { z: 500, scale: 1, opacity: 1, duration: .6, ease: 'expo.out' }, tO + .12 + i * .012);
+  tl.to(c, { z: 0, scale: .1, opacity: 0, duration: .7, ease: 'power4.in' }, 44.55 + (i % 5) * .03);
+});
+tl.fromTo('#ring', { rotationX: -24, rotationY: 0 }, { rotationX: -16, rotationY: 300, duration: 3.8, ease: 'power2.inOut' }, tO + .12);
+tl.fromTo('#oFlash', { opacity: 0, scale: .4 }, { opacity: 1, scale: 1.1, duration: .35, ease: 'power2.out' }, 45.15);
+tl.to('#oFlash', { opacity: 0, scale: 1.4, duration: .7, ease: 'power2.out' }, 45.5);
+tl.to('#oLogo', { scale: 1.12, duration: .35, ease: 'back.out(3)' }, 45.15);
+tl.to('#oLogo', { scale: 1.04, duration: .5, ease: 'sine.inOut' }, 45.5);
+tl.fromTo('#oSarava', { yPercent: 110, clipPath: 'inset(0 100% 0 0)' }, { yPercent: 0, clipPath: 'inset(0 -15% 0 0)', duration: .9, ease: 'power4.out' }, 43.4);
+tl.fromTo('#oTenda .word', { yPercent: 120 }, { yPercent: 0, duration: .6, stagger: .09 }, 43.9);
+tl.fromTo('#oName1 .word', { yPercent: 120, rotation: 6 }, { yPercent: 0, rotation: 0, duration: .7, stagger: .1 }, 44.2);
+tl.fromTo('#oName2 .word', { yPercent: 120, rotation: 6 }, { yPercent: 0, rotation: 0, duration: .7, stagger: .1 }, 44.55);
+tl.fromTo('#outroTxt', { y: 10 }, { y: -10, duration: 2.4, ease: 'sine.inOut' }, 43.6);
+
+window.__timelines = window.__timelines || {};
+window.__timelines['main'] = tl;
+tl.seek(0);
+
+/* ---------- Three.js: partículas (esfera → guia → esfera), tudo em função do tempo ---------- */
+const N = 2600;
+const renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('three'), antialias: true, alpha: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(1); renderer.setSize(1080, 1920, false); renderer.setClearColor(0x000000, 0);
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, 1080 / 1920, 1, 5000);
+// semente fixa
+let seed = 7; const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+const SPH = new Float32Array(N * 3), GUIA = new Float32Array(N * 3), CAM = new Float32Array(N * 3), COL = new Float32Array(N * 3), SZ = new Float32Array(N);
+const beadColors = [[1,1,1],[.44,.71,.92],[.95,.76,.18],[.78,.19,.16],[.18,.56,.27],[.54,.35,.17],[.6,.48,.78]];
+for (let i = 0; i < N; i++) {
+  // esfera (fibonacci)
+  const y = 1 - (i / (N - 1)) * 2, r = Math.sqrt(1 - y * y), th = i * 2.399963;
+  SPH[i*3] = Math.cos(th) * r * 360; SPH[i*3+1] = y * 360; SPH[i*3+2] = Math.sin(th) * r * 360;
+  // guia: 42 contas num anel inclinado
+  const b = i % 42, ang = b / 42 * Math.PI * 2, cr = 26 * Math.cbrt(rnd());
+  const u = rnd() * Math.PI * 2, v = Math.acos(2 * rnd() - 1);
+  const bx = Math.cos(ang) * 560, bz = Math.sin(ang) * 560;
+  GUIA[i*3] = bx + cr * Math.sin(v) * Math.cos(u); GUIA[i*3+1] = cr * Math.cos(v); GUIA[i*3+2] = bz + cr * Math.sin(v) * Math.sin(u);
+  // campo espalhado (para atravessar)
+  CAM[i*3] = (rnd() - .5) * 2400; CAM[i*3+1] = (rnd() - .5) * 3600; CAM[i*3+2] = (rnd() - .5) * 2400;
+  const bc = beadColors[b % 7], g = .55 + .45 * rnd();
+  COL[i*3] = bc[0] * .55 + .97 * .45 * g; COL[i*3+1] = bc[1] * .55 + .84 * .45 * g; COL[i*3+2] = bc[2] * .55 + .49 * .45 * g;
+  SZ[i] = 5 + rnd() * 9;
+}
+const geo = new THREE.BufferGeometry();
+const POS = new Float32Array(N * 3);
+geo.setAttribute('position', new THREE.BufferAttribute(POS, 3));
+geo.setAttribute('color', new THREE.BufferAttribute(COL, 3));
+geo.setAttribute('size', new THREE.BufferAttribute(SZ, 1));
+const mat = new THREE.ShaderMaterial({
+  transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, vertexColors: true,
+  uniforms: { uGlow: { value: 1 }, uFocus: { value: 900 } },
+  vertexShader: `attribute float size; varying vec3 vC; varying float vBlur; uniform float uFocus;
+    void main(){ vC = color; vec4 mv = modelViewMatrix * vec4(position,1.0); float d = -mv.z;
+      vBlur = clamp(abs(d - uFocus) / 700.0, 0.0, 1.0);
+      gl_PointSize = size * (900.0 / d) * (1.0 + vBlur * 2.2); gl_Position = projectionMatrix * mv; }`,
+  fragmentShader: `varying vec3 vC; varying float vBlur; uniform float uGlow;
+    void main(){ vec2 p = gl_PointCoord - 0.5; float r = length(p); float edge = mix(0.12, 0.5, vBlur);
+      float a = smoothstep(0.5, 0.5 - edge, r) * mix(1.0, 0.28, vBlur) * uGlow; if (a < 0.01) discard; gl_FragColor = vec4(vC * a, a); }`
+});
+const pts = new THREE.Points(geo, mat); scene.add(pts);
+
+const ease = x => x < 0 ? 0 : x > 1 ? 1 : (x < .5 ? 16 * x ** 5 : 1 - Math.pow(-2 * x + 2, 5) / 2); // power4.inOut aprox
+const expo = x => x <= 0 ? 0 : x >= 1 ? 1 : 1 - Math.pow(2, -10 * x);
+const seg = (t, a, b) => (t - a) / (b - a);
+function stepRot(t, base) { // gira 1/42 de volta a cada item, com assentamento expo
+  if (t < base) return 0; const k = Math.floor((t - base) / STEP), f = expo(((t - base) % STEP) / .6);
+  return (k + f) * (Math.PI * 2 / 21);
+}
+function draw(t) {
+  // mistura das formas
+  let A = SPH, B = SPH, m = 0;
+  if (t < 4.2) { A = SPH; B = SPH; m = 0; }
+  else if (t < 5.4) { A = SPH; B = CAM; m = ease(seg(t, 4.2, 5.4)); }
+  else if (t < 7.6) { A = CAM; B = GUIA; m = ease(seg(t, 5.4, 7.6)); }
+  else if (t < 41.4) { A = GUIA; B = GUIA; m = 0; }
+  else { A = GUIA; B = SPH; m = ease(seg(t, 41.4, 43.4)); }
+  const sc = t > 41.4 ? 1 - .35 * ease(seg(t, 41.4, 43.4)) : 1;
+  for (let i = 0; i < N * 3; i++) POS[i] = (A[i] + (B[i] - A[i]) * m) * sc;
+  geo.attributes.position.needsUpdate = true;
+  // rotação e câmera
+  let ry = t * .12 + stepRot(t, PA) + stepRot(t, PB);
+  pts.rotation.y = ry;
+  // centro na tela: brasão no começo e no fim, cartão no desfile
+  const P0 = [-40, 390], P1 = [0, -60], P2 = [-42, 160];
+  let px = P1[0], py = P1[1];
+  if (t < 4.2) { px = P0[0]; py = P0[1]; }
+  else if (t < 7.6) { const k = ease(seg(t, 4.2, 7.6)); px = P0[0] + (P1[0] - P0[0]) * k; py = P0[1] + (P1[1] - P0[1]) * k; }
+  else if (t > 41.4) { const k = ease(seg(t, 41.4, 43.4)); px = P1[0] + (P2[0] - P1[0]) * k; py = P1[1] + (P2[1] - P1[1]) * k; }
+  pts.position.set(px, py, 0);
+  pts.rotation.x = t < 7.6 ? .25 : .55 + Math.sin(t * .4) * .06;
+  pts.rotation.z = t < 7.6 ? 0 : -.18;
+  let camZ = 1250 - 80 * Math.sin(t * .3);
+  if (t > 4.0 && t < 5.6) camZ -= 900 * Math.sin(Math.PI * seg(t, 4.0, 5.6));
+  if (t > 22.9 && t < 26.6) camZ += 260 * Math.sin(Math.PI * seg(t, 22.9, 26.6));
+  if (t > 41.4) camZ -= 250 * ease(seg(t, 41.4, 46));
+  camera.position.set(Math.sin(t * .25) * 50, Math.cos(t * .2) * 40, camZ);
+  camera.lookAt(0, 0, 0);
+  mat.uniforms.uFocus.value = camZ - 120;
+  mat.uniforms.uGlow.value = t < .6 ? t / .6 : 1;
+  renderer.render(scene, camera);
+  // grão muda a cada quadro de 24 qps (determinístico)
+  document.getElementById('turb').setAttribute('seed', String(1 + Math.floor(t * 24) % 97));
+}
+window.__hfThreeRender = () => draw(window.__hfThreeTime || 0);
+window.addEventListener('hf-seek', e => { const t = e && e.detail && typeof e.detail.time === 'number' ? e.detail.time : (window.__hfThreeTime || 0); draw(t); });
+draw(0);
+})();
+</script>
+</body>
+</html>
