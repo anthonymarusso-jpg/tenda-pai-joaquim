@@ -107,8 +107,9 @@ const ic = n => `<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">${P[n]}<
 const RISCADO = cls => `<svg class="${cls}" viewBox="0 0 100 100" aria-hidden="true"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M14 22C34 26 60 48 78 76"/><path d="M86 22C66 26 40 48 22 76"/><path d="M72 80l12-7M78 76l6 11"/><path d="M28 80 16 73M22 76l-6 11"/><path d="M8 36l7 14-5 0 6 15"/><path d="M92 36l-7 14 5 0-6 15"/><path d="M50 8v66"/><path d="M50 9c6-3 12-2 17 1v13c-5-3-11-4-17-1"/><circle cx="50" cy="88" r="4"/></g></svg>`;
 
 /* ---------- dados ---------- */
+const END_PADRAO = 'Rua Pedro Álvares Cabral, 235 – Santa Luzia, Ribeirão Pires';
 function casaPadrao() {
-  return { nome: 'Tenda de Umbanda Pai Joaquim de Angola e Manezinho Boiadeiro', dirigente: '', endereco: '', pix: '', mensal: 60, venc: 10 };
+  return { nome: 'Tenda de Umbanda Pai Joaquim de Angola e Manezinho Boiadeiro', dirigente: '', endereco: END_PADRAO, pix: '', mensal: 60, venc: 10 };
 }
 function seed() {
   const m = ym(new Date()), dd = new Date().getDate();
@@ -176,7 +177,7 @@ function seed() {
 function valid(o) { return o && Array.isArray(o.members) && Array.isArray(o.tx) && Array.isArray(o.events) && Array.isArray(o.stock) && Array.isArray(o.notices); }
 function normalize(o) {
   o.v = 2; o.pres = o.pres || {}; o.fila = o.fila || {}; o.pontos = o.pontos || []; o.casa = Object.assign(casaPadrao(), o.casa || {});
-  o.pinHash = o.pinHash || ''; o.tema = o.tema || 'auto';
+  if (!o.casa.endereco) o.casa.endereco = END_PADRAO; o.pinHash = o.pinHash || ''; o.tema = o.tema || 'auto';
   o.members.forEach(x => { if (x.entidade && !x.entidades) x.entidades = x.entidade; x.entidades = x.entidades || ''; if (!Array.isArray(x.orixas)) x.orixas = x.orixa ? [{ n: x.orixa, p: 'De cabeça (1º)' }] : []; if (!Array.isArray(x.guias)) x.guias = x.entidades.split(',').map(z => z.trim()).filter(Boolean).map(n => ({ l: guessLinha(n), n, el: [] })); x.nasc = x.nasc || ''; x.entrada = x.entrada || ''; x.obs = x.obs || ''; });
   o.events.forEach(e => { if (!e.linha) e.linha = guessLinha(e.tipo || e.titulo || ''); });
   o.stock.forEach(i => { i.cat = i.cat || 'Outros'; });
@@ -297,9 +298,7 @@ home() {
   const low = S.stock.filter(i => i.qtd <= i.min), n = S.notices[0], dia = DIAS_ORIXA[now.getDay()];
   const aniv = anivMes(), festas = proximasFestas(2);
   const saudacao = `<section class="dia">${fotoBg(dia.img, 'foto')}<span class="eyebrow">${esc(DIA_L[now.getDay()])} · dia de ${esc(dia.quem)}</span><span class="saud">${esc(dia.saud)}</span><span class="linhadia">Linha do dia: <b>${esc(dia.linha)}</b></span><p>Saravá, ${esc(S.casa.dirigente ? S.casa.dirigente.split(' ')[0] : 'filho de fé')}! Que o axé da casa siga firme.</p><span class="contas">${contas(dia.cores)}</span></section>`;
-  const hero = nx
-    ? `<section class="hero${giraImg(nx) ? ' comfoto' : ''}${ehFesta(nx) ? ' ehfesta' : ''}" style="--ac:${(LINHAS[nx.linha] || LINHAS.outros).cores[0]}">${giraImg(nx) ? banImg(giraImg(nx), ehFesta(nx)) : RISCADO('riscado')}<span class="lbl">${ehFesta(nx) ? 'Próxima festa' : 'Próxima gira'}</span><strong>${esc(nx.titulo)}</strong><span class="quando">${esc(quando(nx.data))}</span><p>${esc(fmtLong(nx.data))} · ${esc(nx.hora || '')}${nx.local ? ' · ' + esc(nx.local) : ''}</p><div class="acts"><button class="btn sm" data-act="ev-open" data-id="${nx.id}">${ehFesta(nx) ? 'Abrir festa' : 'Abrir gira'}</button><button class="btn sm ghost" data-act="ev-share" data-id="${nx.id}">${ic('share')}Avisar a casa</button></div></section>`
-    : `<section class="hero">${RISCADO('riscado')}<span class="lbl">Próxima gira</span><strong>Nenhuma gira marcada</strong><p>Marque a próxima gira para avisar a corrente.</p><div class="acts"><button class="btn sm" data-act="ev-new">Marcar gira</button></div></section>`;
+  const hero = heroHtml();
   const dueRows = pend.slice(0, 3).map(x => `<div class="row"><span class="av">${esc(initials(x.nome))}</span><span class="main"><strong>${esc(x.nome)}</strong><small class="num">${brl(x.mensal)}</small></span><button class="btn sm" data-act="receber" data-mid="${x.id}" data-m="${m}">Receber</button></div>`).join('');
   const anivRows = aniv.map(x => { const d = Number(x.nasc.slice(8)); const hoje = d === now.getDate(); return `<button class="row" data-act="member-open" data-id="${x.id}"><span class="av bday">${ic('bolo')}</span><span class="main"><strong>${esc(x.nome)}</strong><small>${hoje ? 'Faz aniversário hoje!' : 'Dia ' + d + ' de ' + MES_L[now.getMonth()]}</small></span>${hoje ? '<em class="chip gold">Hoje</em>' : ''}</button>`; }).join('');
   const festaRows = festas.map(f => { const d = parse(f.d); return `<div class="row festa comban">${banImg(festaKey(f.quem), true)}<span class="dt"><b>${d.getDate()}</b><i>${MES_S[d.getMonth()]}</i></span><span class="main"><strong>${esc(f.quem)}</strong><small>${esc(f.nome)} · ${esc(quando(f.d).toLowerCase())}</small></span></div>`; }).join('');
@@ -398,7 +397,7 @@ ajustes() {
     `<div class="card stack"><h3 style="margin:0">Senha do app</h3><p style="margin:0" class="muted">${S.pinHash ? 'O app pede uma senha de 4 números ao abrir.' : 'Proteja o caixa e os dados dos filhos com uma senha de 4 números.'}</p>${S.pinHash ? '<div class="grid2"><button class="btn ghost" data-act="pin-set">Trocar senha</button><button class="btn danger" data-act="pin-off">Tirar senha</button></div>' : '<button class="btn" data-act="pin-set">Criar senha</button>'}</div>` +
     `<div class="card stack"><h3 style="margin:0">Cópia de segurança</h3><p style="margin:0" class="muted">Os dados ficam só neste celular. Salve uma cópia e guarde no Drive ou mande para você no WhatsApp. Use a mesma cópia para passar tudo para outro celular.</p><div class="grid2"><button class="btn" data-act="bk-export">Salvar cópia</button><label class="btn ghost" for="bkfile">Restaurar cópia</label></div><input id="bkfile" type="file" accept="application/json,.json" hidden></div>` +
     `<div class="card stack"><h3 style="margin:0">Recomeçar</h3>${S.demo ? '<button class="btn danger block" data-act="demo-ask">Apagar os dados de exemplo</button>' : '<button class="btn danger block" data-act="seed-ask">Apagar tudo e ver os exemplos</button>'}</div>` +
-    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.10</p>`;
+    `<p class="muted" style="text-align:center;margin:4px 0 0">${esc(casaCurta())}<br>versão 2.11</p>`;
 }
 };
 const menuRow = (v, i, a, b) => `<button class="row" data-act="mais-go" data-v="${v}"><span class="av">${ic(i)}</span><span class="main"><strong>${a}</strong><small>${b}</small></span>${ic('right')}</button>`;
@@ -455,8 +454,114 @@ function reciboTexto(x, t) {
   return `Saravá, ${x.nome.split(' ')[0]}! Recebemos a sua mensalidade de ${mesLabel(t.mes || t.data.slice(0, 7))}: ${brl(t.valor)}, em ${fmtBR(t.data)}.\nObrigado por manter a casa de pé. Axé!\n${casaCurta()}`;
 }
 function giraTexto(e) {
-  return `${casaCurta().toUpperCase()}\n\n${e.titulo}\n${fmtLong(e.data)}, às ${e.hora || ''}${e.local ? '\nLocal: ' + e.local : ''}${S.casa.endereco ? '\n' + S.casa.endereco : ''}${e.obs ? '\n\n' + e.obs : ''}\n\nSaravá!`;
+  return `*${casaCurta()}*\n\n*${e.titulo}*\n📅 ${diaExtenso(e.data)}\n🕗 Início às ${e.hora || '20:00'}\n📍 ${enderecoGira(e)}${e.obs ? '\n\n' + e.obs : ''}\n\nSaravá!`;
 }
+
+/* ---------- banner da próxima gira: passa para a próxima / volta, e compartilha o convite ---------- */
+function heroHtml(dir) {
+  const l = nextEvents();
+  if (!l.length) return `<section class="hero">${RISCADO('riscado')}<span class="lbl">Próxima gira</span><strong>Nenhuma gira marcada</strong><p>Marque a próxima gira para avisar a corrente.</p><div class="acts"><button class="btn sm" data-act="ev-new">Marcar gira</button></div></section>`;
+  UI.heroIdx = Math.max(0, Math.min(UI.heroIdx || 0, l.length - 1));
+  const i = UI.heroIdx, nx = l[i], gi = giraImg(nx), fe = ehFesta(nx);
+  const lbl = i === 0 ? (fe ? 'Próxima festa' : 'Próxima gira') : (fe ? 'Festa' : 'Gira') + ' · ' + (i + 1) + 'ª da agenda';
+  setTimeout(() => preConvite(nx), 400);
+  return `<section class="hero${gi ? ' comfoto' : ''}${fe ? ' ehfesta' : ''}${dir ? ' vai-' + dir : ''}" style="--ac:${(LINHAS[nx.linha] || LINHAS.outros).cores[0]}">${gi ? banImg(gi, fe) : RISCADO('riscado')}
+    <span class="lbl">${lbl}</span><strong>${esc(nx.titulo)}</strong><span class="quando">${esc(quando(nx.data))}</span>
+    <p>${esc(fmtLong(nx.data))} · ${esc(nx.hora || '20:00')}<br>${esc(enderecoGira(nx))}</p>
+    <div class="acts"><button class="btn sm" data-act="ev-open" data-id="${nx.id}">${fe ? 'Abrir festa' : 'Abrir gira'}</button><button class="btn sm wa" data-act="ev-share" data-id="${nx.id}">${ic('share')}WhatsApp</button></div>
+    ${l.length > 1 ? `<div class="heronav"><button class="hn" data-act="hero-prev" aria-label="Gira anterior"${i === 0 ? ' disabled' : ''}>${ic('left')}</button><span class="hdots">${l.slice(0, 8).map((_, k) => `<i${k === i ? ' class="on"' : ''}></i>`).join('')}</span><button class="hn" data-act="hero-next" aria-label="Próxima gira"${i === l.length - 1 ? ' disabled' : ''}>${ic('right')}</button></div>` : ''}
+  </section>`;
+}
+function heroVai(passo) {
+  const l = nextEvents(), n = Math.max(0, Math.min((UI.heroIdx || 0) + passo, l.length - 1));
+  if (n === UI.heroIdx) return;
+  UI.heroIdx = n; const h = $('.hero'); if (h) h.outerHTML = heroHtml(passo > 0 ? 'prox' : 'ant');
+}
+let toqueX = null;
+document.addEventListener('touchstart', e => { toqueX = e.target.closest('.hero') ? e.touches[0].clientX : null; }, { passive: true });
+document.addEventListener('touchend', e => { if (toqueX === null) return; const dx = e.changedTouches[0].clientX - toqueX; toqueX = null; if (Math.abs(dx) > 50) heroVai(dx < 0 ? 1 : -1); }, { passive: true });
+
+/* ---------- convite da gira (imagem pronta para o WhatsApp) ---------- */
+const diaExtenso = d => { const x = parse(d); const w = DIA_L[x.getDay()]; return w[0].toUpperCase() + w.slice(1) + ', ' + x.getDate() + ' de ' + MES_L[x.getMonth()]; };
+const enderecoGira = e => (e.local && /\d/.test(e.local)) ? e.local : (S.casa.endereco || END_PADRAO);
+const convCache = {};
+const convChave = e => [e.id, e.titulo, e.data, e.hora, e.linha, e.local, S.casa.endereco].join('|');
+const carregaImg = src => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
+function preConvite(e) { const k = convChave(e); if (!convCache[k]) convCache[k] = gerarConvite(e).catch(() => { delete convCache[k]; return null; }); return convCache[k]; }
+async function gerarConvite(e) {
+  const W = 1080, H = 1350, c = document.createElement('canvas'); c.width = W; c.height = H; const g = c.getContext('2d');
+  const fe = ehFesta(e), k = giraImg(e) || 'oxala', a = (window.AXE ? AXE.ORIXAS.concat(AXE.LINHAS) : []).find(z => z.k === k) || {};
+  const cores = a.cores || (LINHAS[e.linha] || LINHAS.outros).cores, GOLD = '#e9be5c';
+  await Promise.all(["800 90px Alegreya", "700 60px Caveat", "800 40px 'Alegreya Sans'", "700 34px 'Alegreya Sans'"].map(f => document.fonts.load(f).catch(() => {})));
+  const [foto, logo] = await Promise.all([carregaImg(`img/${k}.jpg`), carregaImg('icons/logo-320.png').catch(() => null)]);
+  // fundo
+  const bg = g.createLinearGradient(0, 0, 0, H); bg.addColorStop(0, '#0d1f5c'); bg.addColorStop(1, '#060c26'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  // foto da linha no alto
+  const ph = 780, sc = Math.max(W / foto.width, ph / foto.height), fw = foto.width * sc, fh = foto.height * sc;
+  g.drawImage(foto, (W - fw) / 2, -(fh - ph) * .12, fw, fh);
+  let gr = g.createLinearGradient(0, 0, 0, 260); gr.addColorStop(0, 'rgba(6,12,38,.85)'); gr.addColorStop(1, 'rgba(6,12,38,0)'); g.fillStyle = gr; g.fillRect(0, 0, W, 260);
+  gr = g.createLinearGradient(0, ph - 360, 0, ph); gr.addColorStop(0, 'rgba(6,12,38,0)'); gr.addColorStop(1, '#0a1544'); g.fillStyle = gr; g.fillRect(0, ph - 360, W, 362);
+  g.fillStyle = '#0a1544'; g.fillRect(0, ph, W, H - ph);
+  const glow = g.createRadialGradient(W / 2, ph + 40, 10, W / 2, ph + 40, 700); glow.addColorStop(0, fe ? 'rgba(233,190,92,.28)' : 'rgba(120,150,255,.16)'); glow.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = glow; g.fillRect(0, ph - 300, W, H);
+  // semente fixa por gira para confete/contas
+  let sd = 0; for (const ch of e.id + e.titulo) sd = (sd * 31 + ch.charCodeAt(0)) >>> 0; const rnd = () => ((sd = (sd * 1664525 + 1013904223) >>> 0) / 4294967296);
+  if (fe) {
+    const pal = cores.concat([GOLD, '#ffffff']);
+    for (let i = 0; i < 160; i++) { const x = rnd() * W, y = 200 + rnd() * (H - 240); if (y > 760 && y < 1290 && x > 60 && x < 1020 && rnd() < .8) continue; g.save(); g.translate(x, y); g.rotate(rnd() * 3.14); g.fillStyle = pal[i % pal.length]; g.globalAlpha = .55 + rnd() * .4; g.fillRect(-7, -3, 14, 6); g.restore(); }
+    // bandeirinhas
+    [[[-20, 668], [1100, 676], 46, 16]].forEach(([p0, p1, sag, n]) => {
+      const pt = t => [p0[0] + (p1[0] - p0[0]) * t, p0[1] + (p1[1] - p0[1]) * t + sag * 4 * t * (1 - t)];
+      g.strokeStyle = 'rgba(255,240,200,.85)'; g.lineWidth = 3; g.beginPath(); for (let i = 0; i <= 40; i++) { const [x, y] = pt(i / 40); i ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke();
+      for (let i = 0; i < n; i++) { const [x0, y0] = pt(i / n), [x1, y1] = pt((i + 1) / n); g.fillStyle = pal[i % pal.length]; g.beginPath(); g.moveTo(x0 + 4, y0); g.lineTo(x1 - 4, y1); g.lineTo((x0 + x1) / 2, (y0 + y1) / 2 + 52); g.closePath(); g.fill(); }
+    });
+  }
+  // cabeçalho com o brasão
+  if (logo) { g.save(); g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 16; g.fillStyle = '#fff'; g.beginPath(); g.arc(118, 112, 72, 0, 7); g.fill(); g.restore(); g.save(); g.beginPath(); g.arc(118, 112, 66, 0, 7); g.clip(); g.drawImage(logo, 52, 46, 132, 132); g.restore(); }
+  g.fillStyle = '#fff'; g.shadowColor = 'rgba(0,0,0,.7)'; g.shadowBlur = 10;
+  g.font = "800 22px 'Alegreya Sans'"; g.letterSpacing = '5px'; g.fillText('TENDA DE UMBANDA', 214, 84); g.letterSpacing = '0px';
+  g.font = '800 38px Alegreya'; g.fillText('Pai Joaquim de Angola', 214, 128); g.fillText('e Manezinho Boiadeiro', 214, 170); g.shadowBlur = 0;
+  // painel de texto
+  let y = 832;
+  const tag = fe ? 'FESTA' : ((LINHAS[e.linha] || {}).nome || 'GIRA').toUpperCase();
+  g.font = "800 26px 'Alegreya Sans'"; g.letterSpacing = '6px'; const tw = g.measureText(tag).width + 52;
+  g.fillStyle = fe ? GOLD : 'rgba(255,255,255,.16)'; g.beginPath(); g.roundRect((W - tw) / 2, y - 40, tw, 54, 27); g.fill();
+  g.fillStyle = fe ? '#2a1c00' : '#fff'; g.textAlign = 'center'; g.fillText(tag, W / 2 + 3, y - 4); g.letterSpacing = '0px';
+  // título (ajusta tamanho e quebra em até 2 linhas)
+  const tit = e.titulo; let fs = 86, linhas;
+  const quebra = (t, max) => { const ws = t.split(/\s+/), out = []; let cur = ''; ws.forEach(w => { const tt = cur ? cur + ' ' + w : w; if (g.measureText(tt).width > max && cur) { out.push(cur); cur = w; } else cur = tt; }); if (cur) out.push(cur); return out; };
+  do { g.font = `800 ${fs}px Alegreya`; linhas = quebra(tit, 960); fs -= 4; } while ((linhas.length > 2 || linhas.some(l => g.measureText(l).width > 980)) && fs > 52);
+  g.fillStyle = '#fff'; g.shadowColor = 'rgba(0,0,0,.5)'; g.shadowBlur = 12; y += 88;
+  linhas.slice(0, 2).forEach(l => { g.fillText(l, W / 2, y); y += fs * 1.02; }); g.shadowBlur = 0;
+  if (a.s) { g.font = '700 56px Caveat'; g.fillStyle = GOLD; g.fillText(a.s, W / 2, y + 4); y += 62; }
+  // data, hora e endereço com ícones
+  const icone = (tipo, x, yy) => { g.save(); g.strokeStyle = GOLD; g.lineWidth = 4; g.lineCap = 'round'; g.translate(x, yy);
+    if (tipo === 'cal') { g.strokeRect(-16, -14, 32, 28); g.beginPath(); g.moveTo(-16, -4); g.lineTo(16, -4); g.moveTo(-8, -20); g.lineTo(-8, -10); g.moveTo(8, -20); g.lineTo(8, -10); g.stroke(); }
+    if (tipo === 'hora') { g.beginPath(); g.arc(0, 0, 16, 0, 7); g.moveTo(0, -9); g.lineTo(0, 0); g.lineTo(7, 5); g.stroke(); }
+    if (tipo === 'pin') { g.beginPath(); g.arc(0, -6, 11, Math.PI * .85, Math.PI * 2.15); g.lineTo(0, 16); g.closePath(); g.stroke(); g.beginPath(); g.arc(0, -6, 3.5, 0, 7); g.stroke(); }
+    g.restore(); };
+  const linhaInfo = (tipo, txt, font) => { g.font = font; const w = g.measureText(txt).width; const x0 = (W - w) / 2 + 24; icone(tipo, x0 - 34, y - 13); g.fillStyle = '#fff'; g.textAlign = 'left'; g.fillText(txt, x0, y); g.textAlign = 'center'; };
+  y += 26;
+  linhaInfo('cal', diaExtenso(e.data), "800 40px 'Alegreya Sans'"); y += 54;
+  linhaInfo('hora', 'Início às ' + (e.hora || '20:00') + ' h', "800 40px 'Alegreya Sans'"); y += 54;
+  const end = enderecoGira(e); g.font = "700 34px 'Alegreya Sans'";
+  const partes = g.measureText(end).width > 900 ? end.split(/\s[–-]\s|,\s(?=[^,]*$)/) : [end];
+  linhaInfo('pin', partes[0], "700 34px 'Alegreya Sans'"); if (partes[1]) { y += 44; g.fillStyle = 'rgba(255,255,255,.85)'; g.fillText(partes.slice(1).join(' – '), W / 2, y); }
+  // guia de contas no rodapé
+  const by = fe ? H - 66 : H - 40, nb = fe ? 33 : 36, bx0 = fe ? 58 : 30; for (let i = 0; i < nb; i++) { const x = bx0 + i * 29.4, yy = by + Math.sin(i / (nb - 1) * Math.PI) * -10; g.fillStyle = cores[i % cores.length]; g.beginPath(); g.arc(x, yy, 10, 0, 7); g.fill(); g.strokeStyle = 'rgba(0,0,0,.35)'; g.lineWidth = 1.5; g.stroke(); g.fillStyle = 'rgba(255,255,255,.45)'; g.beginPath(); g.arc(x - 3, yy - 3, 3, 0, 7); g.fill(); }
+  if (fe) { g.strokeStyle = GOLD; g.lineWidth = 8; g.beginPath(); g.roundRect(14, 14, W - 28, H - 28, 34); g.stroke(); g.strokeStyle = 'rgba(255,236,170,.6)'; g.lineWidth = 3; g.beginPath(); g.roundRect(30, 30, W - 60, H - 60, 26); g.stroke(); }
+  return await new Promise(ok => c.toBlob(ok, 'image/jpeg', .9));
+}
+const nomeArq = e => ('convite ' + e.titulo + ' ' + e.data).replace(/[^\wÀ-ú -]/g, '').trim().replace(/\s+/g, '-').toLowerCase() + '.jpg';
+async function enviarConvite(e) {
+  const blob = await preConvite(e), texto = giraTexto(e);
+  if (blob) {
+    const file = new File([blob], nomeArq(e), { type: 'image/jpeg' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) { try { await navigator.share({ files: [file], text: texto }); return; } catch (x) { if (x && x.name === 'AbortError') return; } }
+    baixarBlob(blob, nomeArq(e)); toast('Convite baixado. Anexe a imagem no WhatsApp.');
+  }
+  window.open(waLink('', texto), '_blank', 'noopener');
+}
+function baixarBlob(blob, nome) { const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = nome; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1500); }
 
 /* ---------- formulários ---------- */
 
@@ -665,10 +770,12 @@ function openEvent(id, keep) {
   sheet(e.titulo, `<div class="stack">
     ${gi ? `<div class="evbanner${fe ? ' ehfesta' : ''}" style="--ac:${(LINHAS[e.linha] || LINHAS.outros).cores[0]}">${banImg(gi, fe)}<span class="lbl">${fe ? 'Festa · ' : ''}${esc((LINHAS[e.linha] || LINHAS.outros).nome)}</span><strong>${esc(e.titulo)}</strong><span class="q">${esc(fmtLong(e.data))} · ${esc(e.hora || '')}</span></div>` : ''}
     <dl class="kv card"><dt>Quando</dt><dd>${esc(fmtLong(e.data))} · ${esc(e.hora || '')}</dd><dt>Linha</dt><dd>${linhaChip(e.linha)}</dd><dt>Local</dt><dd>${esc(e.local || '—')}</dd>${e.obs ? `<dt>Recado</dt><dd>${esc(e.obs)}</dd>` : ''}</dl>
-    <div class="grid2"><button class="btn wa" data-act="ev-share" data-id="${id}">${ic('share')}Avisar a casa</button><button class="btn ghost" data-act="ev-ics" data-id="${id}">${ic('cal')}Pôr na agenda</button></div>
+    <div class="convite card"><span class="clbl">Convite pronto para o WhatsApp</span><img id="convPrev" alt="Convite da ${esc(e.titulo)}" width="1080" height="1350"><div class="grid2"><button class="btn wa" data-act="ev-share" data-id="${id}">${ic('share')}Enviar no WhatsApp</button><button class="btn ghost" data-act="ev-baixar" data-id="${id}">Baixar imagem</button></div></div>
+    <button class="btn ghost block" data-act="ev-ics" data-id="${id}">${ic('cal')}Pôr na agenda</button>
     ${tabs}${UI.evTab === 'fila' ? filaHtml : chamadaHtml}
     <button class="btn ghost block" data-act="ev-edit" data-id="${id}">Editar gira</button></div>`);
   if (keep) $('#sheet').scrollTop = st;
+  preConvite(e).then(bl => { const im = $('#convPrev'); if (im && bl) { if (im.dataset.u) URL.revokeObjectURL(im.dataset.u); im.dataset.u = URL.createObjectURL(bl); im.src = im.dataset.u; } });
 }
 function openFicha(tipo, k) {
   const list = tipo === 'l' ? AXE.LINHAS : AXE.ORIXAS, o = list.find(x => x.k === k); if (!o) return;
@@ -778,7 +885,10 @@ const ACT = {
   'ev-open': d => { UI.evTab = byId(S.events, d.id) && byId(S.events, d.id).data <= today() ? 'fila' : 'chamada'; if ((S.fila[d.id] || []).length) UI.evTab = 'fila'; openEvent(d.id); },
   'ev-edit': d => sheet('Editar gira', eventForm(byId(S.events, d.id))),
   'ev-del': d => { S.events = S.events.filter(x => x.id !== d.id); delete S.pres[d.id]; delete S.fila[d.id]; save(); closeSheet(); render(true); toast('Gira excluída'); },
-  'ev-share': d => { const e = byId(S.events, d.id); if (e) share(giraTexto(e), e.titulo); },
+  'ev-share': d => { const e = byId(S.events, d.id); if (e) enviarConvite(e); },
+  'ev-baixar': async d => { const e = byId(S.events, d.id); if (!e) return; const b = await preConvite(e); if (b) baixarBlob(b, nomeArq(e)); },
+  'hero-prev': () => heroVai(-1),
+  'hero-next': () => heroVai(1),
   'ev-ics': d => { const e = byId(S.events, d.id); if (e) saveFile(e.titulo.replace(/[^\wÀ-ú -]/g, '') + '.ics', 'text/calendar', icsFor(e)); },
   presence: d => { const l = S.pres[d.eid] || []; const i = l.indexOf(d.mid); if (i >= 0) l.splice(i, 1); else l.push(d.mid); S.pres[d.eid] = l; save(); openEvent(d.eid, true); render(true); },
   'fila-new': d => sheet('Dar senha', filaForm(d.eid)),

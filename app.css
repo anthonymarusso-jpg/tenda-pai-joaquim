@@ -431,3 +431,23 @@ nav{flex:none;display:grid;grid-template-columns:repeat(5,1fr);background:var(--
   .hero.anim .ban,.evbanner.anim .ban{animation:aKen 1.4s cubic-bezier(.16,1,.3,1) both}
   .evrow.anim .ban,.row.comban.anim .ban{animation:aFromR 1s cubic-bezier(.16,1,.3,1) both calc(var(--i,0) * 60ms + .1s)}
 }
+
+/* carrossel do banner da próxima gira */
+.hero .heronav{position:relative;z-index:2;align-self:flex-start;margin-top:8px;display:flex;align-items:center;gap:6px;background:rgba(6,12,38,.55);backdrop-filter:blur(6px);border-radius:99px;padding:4px}
+.heronav .hn{width:36px;height:36px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;display:grid;place-items:center}
+.heronav .hn:disabled{opacity:.35}
+.heronav .hn .ic{width:20px;height:20px}
+.hdots{display:flex;gap:4px}
+.hdots i{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4)}
+.hdots i.on{background:#fff;width:16px;border-radius:4px}
+.hero .btn.wa{background:#1f8f4e;border-color:#1f8f4e;color:#fff}
+@media (prefers-reduced-motion:no-preference){
+  .hero.vai-prox{animation:aVaiP .5s cubic-bezier(.16,1,.3,1) both}
+  .hero.vai-ant{animation:aVaiA .5s cubic-bezier(.16,1,.3,1) both}
+  @keyframes aVaiP{from{opacity:.2;transform:translateX(60px)}to{opacity:1;transform:none}}
+  @keyframes aVaiA{from{opacity:.2;transform:translateX(-60px)}to{opacity:1;transform:none}}
+  .hero.vai-prox .ban,.hero.vai-ant .ban{animation:aKen 1s cubic-bezier(.16,1,.3,1) both}
+}
+.convite{display:flex;flex-direction:column;gap:10px}
+.convite .clbl{font-weight:800;font-size:15px}
+.convite img{width:100%;height:auto;aspect-ratio:4/5;border-radius:14px;background:linear-gradient(160deg,var(--night),var(--night2));display:block;box-shadow:0 8px 24px rgba(0,0,0,.25)}

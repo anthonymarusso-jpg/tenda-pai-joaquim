@@ -1,7 +1,7 @@
 /* Guarda o app no celular para abrir sem internet. Troque VERSION a cada atualização. */
-const VERSION = 'tenda-v2.10.0';
+const VERSION = 'tenda-v2.11.0';
 const FILES = [
-  './', 'index.html', 'app.css?v=2.10', 'app.js?v=2.10', 'orixas.js?v=2.10', 'manifest.webmanifest',
+  './', 'index.html', 'app.css?v=2.11', 'app.js?v=2.11', 'orixas.js?v=2.11', 'manifest.webmanifest',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/maskable-512.png', 'icons/apple-touch-icon.png', 'icons/logo-320.png',
   'fonts/alegreya-latin-700-normal.woff2', 'fonts/alegreya-latin-800-normal.woff2',
   'fonts/alegreya-sans-latin-400-normal.woff2', 'fonts/alegreya-sans-latin-500-normal.woff2',
